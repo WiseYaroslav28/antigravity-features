@@ -7,7 +7,7 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import { promisify } from 'util';
 
 const require = createRequire(import.meta.url);
@@ -504,47 +504,35 @@ async function triggerSelfUpdate() {
   saveUpdateState();
   
   try {
-    logDebug("[Self Update] Начало процесса обновления...");
-    // 1. Выполняем git pull
-    await execPromise("git pull origin master", { cwd: REPO_DIR });
+    logDebug("[Self Update] Запуск фонового скрипта обновления...");
+    const isDevMode = process.env.MCP_DEV_MODE === 'true';
+    const runnerPath = path.join(userProfileDir, ".gemini", "antigravity", "mcp-servers", "antigravity-features", "update-runner-features.cjs");
     
-    // 2. Считываем обновленную версию из version.json
-    let newVersion = localVersion;
-    const versionPath = path.join(REPO_DIR, "version.json");
-    if (fsSync.existsSync(versionPath)) {
-      try {
-        const vData = JSON.parse(fsSync.readFileSync(versionPath, 'utf8'));
-        newVersion = vData.version || localVersion;
-      } catch (e) {}
-    }
-    
-    logDebug(`[Self Update] Обновление успешно скачано. Новая версия: ${newVersion}`);
-    
-    // 3. Копируем файлы в папку запуска
-    const srcIndex = path.join(REPO_DIR, "index.js");
-    const destIndex = path.join(userProfileDir, ".gemini", "antigravity", "mcp-servers", "antigravity-features", "index.js");
-    fsSync.copyFileSync(srcIndex, destIndex);
-    logDebug("[Self Update] index.js успешно скопирован в папку запуска.");
-    
-    const filesToCopy = ["version.json", "localization_injected.js", "auto_patcher.cjs"];
-    filesToCopy.forEach(f => {
-      const srcF = path.join(REPO_DIR, f);
-      const destF = path.join(userProfileDir, ".gemini", "antigravity", "mcp-servers", "antigravity-features", f);
-      if (fsSync.existsSync(srcF)) {
-        fsSync.copyFileSync(srcF, destF);
+    if (fsSync.existsSync(runnerPath)) {
+      const args = [runnerPath, "--repo-dir", REPO_DIR];
+      if (isDevMode) {
+        args.push("--local-dev");
       }
-    });
-    
-    // 4. Устанавливаем флаги успешного завершения (готово к перезапуску)
-    readyToRestart = true;
-    isUpdating = false;
-    updateAvailable = false;
-    latestVersion = newVersion;
-    saveUpdateState();
-    
-    logDebug("[Self Update] Копирование завершено. Ожидаем подтверждения перезапуска пользователем в интерфейсе.");
+      
+      logDebug(`[Self Update] Запуск фонового процесса: node ${args.join(' ')}`);
+      const child = spawn(
+        process.argv[0],
+        args,
+        {
+          detached: true,
+          stdio: "ignore",
+          windowsHide: true
+        }
+      );
+      child.unref();
+      logDebug("[Self Update] Процесс обновления успешно отсоединен и запущен.");
+    } else {
+      logDebug(`[Self Update Error] Скрипт обновления не найден: ${runnerPath}`);
+      isUpdating = false;
+      saveUpdateState();
+    }
   } catch (err) {
-    logDebug(`[Self Update Error] Ошибка обновления: ${err.message}`);
+    logDebug(`[Self Update Error] Не удалось запустить обновление: ${err.message}`);
     isUpdating = false;
     saveUpdateState();
   }
@@ -761,11 +749,6 @@ async function runUIInjection() {
                    badgeEl.style.setProperty('background', '#1b5e20', 'important');
                    badgeEl.style.setProperty('color', '#a5d6a7', 'important');
                    badgeEl.style.setProperty('border', '1px solid #2e7d32', 'important');
-                 } else if (readyToRestart) {
-                   badgeEl.textContent = 'v' + version + ' (Ожидает перезапуска)';
-                   badgeEl.style.setProperty('background', '#1a3a5f', 'important');
-                   badgeEl.style.setProperty('color', '#adc6ff', 'important');
-                   badgeEl.style.setProperty('border', '1px solid #1d3b6a', 'important');
                  } else if (patchNeedsRestart) {
                    badgeEl.textContent = 'v' + version + ' (Патч ожидает перезапуска)';
                    badgeEl.style.setProperty('background', '#4d3300', 'important');
@@ -789,19 +772,6 @@ async function runUIInjection() {
                    updateBtnEl.style.setProperty('border', 'none', 'important');
                    updateBtnEl.textContent = 'Обновление...';
                    updateBtnEl.onclick = null;
-                 } else if (readyToRestart) {
-                   updateBtnEl.disabled = false;
-                   updateBtnEl.style.setProperty('cursor', 'pointer', 'important');
-                   updateBtnEl.style.setProperty('background', '#e67e22', 'important');
-                   updateBtnEl.style.setProperty('color', '#fff', 'important');
-                   updateBtnEl.style.setProperty('border', 'none', 'important');
-                   updateBtnEl.textContent = 'Перезапустить для v' + latestVersion;
-                   updateBtnEl.onclick = (e) => {
-                     e.stopPropagation();
-                     if (confirm("Все файлы обновления подготовлены.\\n\\nПерезапустить Antigravity сейчас?")) {
-                       window.__antigravity_pending_action = 'restart';
-                     }
-                   };
                  } else if (patchNeedsRestart) {
                    updateBtnEl.disabled = false;
                    updateBtnEl.style.setProperty('cursor', 'pointer', 'important');
@@ -825,13 +795,11 @@ async function runUIInjection() {
                    
                    updateBtnEl.onclick = (e) => {
                      e.stopPropagation();
-                     if (confirm("Начать процесс подготовки файлов обновления?\\n\\nПосле скачивания потребуется подтвердить перезапуск IDE.")) {
-                       updateBtnEl.textContent = 'Обновление...';
-                       updateBtnEl.disabled = true;
-                       updateBtnEl.style.setProperty('background', '#555', 'important');
-                       updateBtnEl.style.setProperty('color', '#ccc', 'important');
-                       window.__antigravity_pending_action = 'update';
-                     }
+                     updateBtnEl.textContent = 'Обновление...';
+                     updateBtnEl.disabled = true;
+                     updateBtnEl.style.setProperty('background', '#555', 'important');
+                     updateBtnEl.style.setProperty('color', '#ccc', 'important');
+                     window.__antigravity_pending_action = 'update';
                    };
                  } else {
                    updateBtnEl.disabled = true;
