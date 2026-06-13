@@ -174,27 +174,29 @@ async function checkUpdatesBackground() {
 
 logDebug("Запуск MCP-сервера расширений AntiGravity (antigravity-features)...");
 
-// Автоматическая проверка и восстановление патча app.asar
-try {
-  logDebug("Проверка целостности патча локализации...");
-  const patchResult = require('child_process').spawnSync('node', [path.join(__dirname, 'auto_patcher.cjs')]);
-  if (patchResult.status === 1) {
-    logDebug("app.asar был успешно пропатчен. Требуется перезапуск, устанавливаем patchNeedsRestart = true...");
-    patchNeedsRestart = true;
-    saveUpdateState();
-  } else if (patchResult.status === 2) {
-    logDebug("Ошибка автопатчера: " + patchResult.stderr.toString());
-  } else {
-    logDebug("Патч локализации присутствует, продолжаем запуск.");
-    if (patchNeedsRestart) {
-      patchNeedsRestart = false;
+// Автоматическая проверка и восстановление патча app.asar (в фоне после старта)
+setTimeout(() => {
+  try {
+    logDebug("Проверка целостности патча локализации в фоновом режиме...");
+    const patchResult = require('child_process').spawnSync(process.argv[0], [path.join(__dirname, 'auto_patcher.cjs')]);
+    if (patchResult.status === 1) {
+      logDebug("app.asar был успешно пропатчен. Требуется перезапуск, устанавливаем patchNeedsRestart = true...");
+      patchNeedsRestart = true;
       saveUpdateState();
-      logDebug("[Update State] Перезапуск после патча успешен, сброшен patchNeedsRestart");
+    } else if (patchResult.status === 2) {
+      logDebug("Ошибка автопатчера: " + (patchResult.stderr ? patchResult.stderr.toString() : "unknown"));
+    } else {
+      logDebug("Патч локализации присутствует.");
+      if (patchNeedsRestart) {
+        patchNeedsRestart = false;
+        saveUpdateState();
+        logDebug("[Update State] Сброшен patchNeedsRestart");
+      }
     }
+  } catch (err) {
+    logDebug("Ошибка при вызове автопатчера: " + err.message);
   }
-} catch (err) {
-  logDebug("Ошибка при вызове автопатчера: " + err.message);
-}
+}, 5000);
 
 // Инициализация простого MCP-сервера
 const server = new McpServer({
@@ -673,9 +675,7 @@ async function runUIInjection() {
                 const gp = p.parentElement;
                 if (!gp || gp.tagName !== 'DIV') return false;
                 
-                // Дедушка должен содержать слово "tools"
-                const gpText = gp.textContent || '';
-                if (!/tools/i.test(gpText)) return false;
+
                 
                 const ggp = gp.parentElement;
                 if (!ggp || ggp.tagName !== 'DIV') return false;
