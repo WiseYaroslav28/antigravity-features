@@ -644,16 +644,15 @@ async function runUIInjection() {
                };
            }
            
-           const state = window.__antigravity_features_state;
-           const version = state.version;
-           const updateAvailable = state.updateAvailable;
-           const isUpdating = state.isUpdating;
-           const justUpdated = state.justUpdated;
-           const readyToRestart = state.readyToRestart;
-           const patchNeedsRestart = state.patchNeedsRestart;
-           const latestVersion = state.latestVersion;
-           
            function renderFeatureBadge() {
+               const state = window.__antigravity_features_state || {};
+               const version = state.version;
+               const updateAvailable = state.updateAvailable;
+               const isUpdating = state.isUpdating;
+               const justUpdated = state.justUpdated;
+               const readyToRestart = state.readyToRestart;
+               const patchNeedsRestart = state.patchNeedsRestart;
+               const latestVersion = state.latestVersion;
               const elements = Array.from(document.querySelectorAll('*'));
               
               const titleEl = elements.find(el => {

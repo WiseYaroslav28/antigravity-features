@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { DatabaseSync } = require('node:sqlite');
 
 // Логирование в файл
 const userProfile = process.env.USERPROFILE || process.env.HOME || 'C:\\Users\\wisey';
@@ -33,6 +34,27 @@ for (let i = 0; i < args.length; i++) {
 }
 
 const updateStatePath = path.join(userProfile, '.gemini', 'antigravity', 'scratch', 'features_update_state.json');
+const dbDir = path.join(userProfile, '.gemini', 'antigravity', 'data');
+const dbPath = path.join(dbDir, 'antigravity.db');
+
+function updateDbStatus(status, message) {
+  try {
+    if (!fs.existsSync(dbDir)) {
+      fs.mkdirSync(dbDir, { recursive: true });
+    }
+    const db = new DatabaseSync(dbPath);
+    db.exec('PRAGMA busy_timeout = 5000;');
+    const stmt = db.prepare(`
+      UPDATE mcp_update_status
+      SET status = ?, status_message = ?, status_changed_at = ?
+      WHERE server_name = 'antigravity-features'
+    `);
+    stmt.run(status, message, Date.now());
+    writeLog(`[DB Status Update] status=${status}, message=${message}`);
+  } catch (err) {
+    writeLog(`[DB Status Warning] Не удалось обновить БД SQLite: ${err.message}`);
+  }
+}
 
 function updateState(fields) {
   try {
@@ -43,6 +65,26 @@ function updateState(fields) {
     data = { ...data, ...fields };
     fs.writeFileSync(updateStatePath, JSON.stringify(data, null, 2), 'utf8');
     writeLog(`[State Update] ${JSON.stringify(fields)}`);
+    
+    // Синхронизируем со SQLite
+    let dbStatus = 'idle';
+    let dbMessage = '';
+    if (fields.isUpdating === true) {
+      dbStatus = 'updating';
+      dbMessage = 'Обновление... ⏳';
+    } else if (fields.isUpdating === false) {
+      if (fields.readyToRestart === true) {
+        dbStatus = 'success';
+        dbMessage = 'Обновлено успешно! 🎉';
+      } else {
+        dbStatus = 'idle';
+        dbMessage = '';
+      }
+    }
+    
+    if (fields.isUpdating !== undefined || fields.readyToRestart !== undefined) {
+      updateDbStatus(dbStatus, dbMessage);
+    }
   } catch (e) {
     writeLog(`[State Error] Не удалось обновить состояние: ${e.message}`);
   }
@@ -317,7 +359,7 @@ function restoreServerInConfig() {
 
 async function runUpdate() {
   try {
-    updateState({ isUpdating: true });
+    updateDbStatus('updating', 'Подготовка к обновлению... ⏳');
     await showToastViaCDP('Запуск фонового обновления antigravity-features... ⏳', false);
     
     // Получаем PID родительского процесса
@@ -327,16 +369,18 @@ async function runUpdate() {
     // 1. Временно отключаем сервер
     disableServerInConfig();
     
-    // Мы НЕ убиваем родительский процесс принудительно через SIGKILL.
-    // Вместо этого мы полагаемся на то, что удаление сервера из mcp_config.json
-    // заставит IDE мягко завершить процесс МСП-сервера с кодом exit 0.
-    writeLog(`Ожидание мягкой остановки родительского процесса (PID: ${parentPid}) от IDE...`);
-    
-    // 2. Ждем остановки процесса и разблокировки
-    writeLog('Ожидание освобождения ресурсов...');
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Мягко останавливаем родительский процесс, а затем жестко завершаем его через taskkill
+    writeLog('Ожидание мягкой остановки родительского процесса IDE...');
+    try {
+      require('child_process').execSync(`taskkill /F /PID ${parentPid}`);
+      writeLog(`Родительский процесс ${parentPid} принудительно завершен.`);
+    } catch (killErr) {
+      writeLog(`Предупреждение: не удалось завершить родительский процесс ${parentPid}: ${killErr.message}`);
+    }
+    await new Promise(resolve => setTimeout(resolve, 1500));
     
     // 3. Выполняем обновление репозитория
+    updateDbStatus('updating', 'Получение обновлений из Git... 📥');
     if (!isLocalDev) {
       writeLog(`Выполнение git pull в директории: ${repoDir}`);
       try {
@@ -350,6 +394,7 @@ async function runUpdate() {
     }
     
     // 4. Копируем файлы в рантайм-папку
+    updateDbStatus('updating', 'Копирование файлов... 📂');
     writeLog('Копирование файлов в рантайм...');
     if (!fs.existsSync(runtimeDir)) {
       fs.mkdirSync(runtimeDir, { recursive: true });
@@ -374,13 +419,28 @@ async function runUpdate() {
       newVersion = verData.version || '1.0.0';
     } catch (_) {}
     
-    // 5. Записываем состояние
+    // 5. Записываем состояние в JSON
     updateState({
       isUpdating: false,
       updateAvailable: false,
       readyToRestart: true,
       latestVersion: newVersion
     });
+    
+    // Дополнительно принудительно выставляем статус 'success' в SQLite
+    try {
+      const db = new DatabaseSync(dbPath);
+      db.exec('PRAGMA busy_timeout = 5000;');
+      const stmt = db.prepare(`
+        UPDATE mcp_update_status
+        SET local_version = ?, status = 'success', status_message = 'Обновлено успешно! 🎉', update_available = 0, status_changed_at = ?
+        WHERE server_name = 'antigravity-features'
+      `);
+      stmt.run(newVersion, Date.now());
+      writeLog('Статус в БД SQLite успешно обновлен на success.');
+    } catch (dbErr) {
+      writeLog(`Предупреждение: Не удалось обновить БД напрямую: ${dbErr.message}`);
+    }
     
     // 6. Восстанавливаем сервер
     restoreServerInConfig();
@@ -399,6 +459,7 @@ async function runUpdate() {
   } catch (err) {
     writeLog(`[ERROR] Ошибка процесса обновления: ${err.stack || err.message}`);
     updateState({ isUpdating: false });
+    updateDbStatus('idle', `Ошибка: ${err.message}`);
     await showToastViaCDP(`Ошибка при обновлении: ${err.message}`, false);
     restoreServerInConfig();
     process.exit(1);
