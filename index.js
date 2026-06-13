@@ -6,6 +6,12 @@ import fsSync from "fs";
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const require = createRequire(import.meta.url);
+const execPromise = promisify(exec);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,6 +24,7 @@ const APPDATA_DIR = path.join(userProfileDir, "AppData", "Roaming", "Antigravity
 const APPDATA_IDE_DIR = path.join(userProfileDir, "AppData", "Roaming", "Antigravity IDE");
 const CONFIG_DIR = path.join(userProfileDir, ".gemini", "config");
 const PROJECTS_DIR = path.join(CONFIG_DIR, "projects");
+const REPO_DIR = "c:\\Antigravity projects\\antigravity-features";
 const BACKUP_DIR = path.join(__dirname, "backups");
 
 // Создаем папку для бэкапов
@@ -31,6 +38,140 @@ function logDebug(message) {
   } catch (e) {}
 }
 
+let localVersion = "1.0.0";
+const versionPath = path.join(__dirname, "version.json");
+if (fsSync.existsSync(versionPath)) {
+  try {
+    const vData = JSON.parse(fsSync.readFileSync(versionPath, 'utf8'));
+    localVersion = vData.version || "1.0.0";
+  } catch(e) {}
+}
+
+let updateAvailable = false;
+let isUpdating = false;
+let justUpdated = false;
+let readyToRestart = false;
+let patchNeedsRestart = false;
+let latestVersion = localVersion;
+
+const UPDATE_STATE_FILE = path.join(userProfileDir, ".gemini", "antigravity", "scratch", "features_update_state.json");
+
+function loadUpdateState() {
+  try {
+    if (fsSync.existsSync(UPDATE_STATE_FILE)) {
+      const data = JSON.parse(fsSync.readFileSync(UPDATE_STATE_FILE, 'utf8'));
+      updateAvailable = data.updateAvailable || false;
+      isUpdating = data.isUpdating || false;
+      justUpdated = data.justUpdated || false;
+      readyToRestart = data.readyToRestart || false;
+      patchNeedsRestart = data.patchNeedsRestart || false;
+      latestVersion = data.latestVersion || localVersion;
+      logDebug(`[Update State] Состояние загружено: updateAvailable=${updateAvailable}, isUpdating=${isUpdating}, justUpdated=${justUpdated}, readyToRestart=${readyToRestart}, patchNeedsRestart=${patchNeedsRestart}`);
+    }
+  } catch (e) {
+    logDebug(`[Update State Error] Не удалось загрузить состояние: ${e.message}`);
+  }
+}
+
+function saveUpdateState() {
+  try {
+    const data = {
+      updateAvailable,
+      isUpdating,
+      justUpdated,
+      readyToRestart,
+      patchNeedsRestart,
+      latestVersion
+    };
+    fsSync.mkdirSync(path.dirname(UPDATE_STATE_FILE), { recursive: true });
+    fsSync.writeFileSync(UPDATE_STATE_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch (e) {
+    logDebug(`[Update State Error] Не удалось сохранить состояние: ${e.message}`);
+  }
+}
+
+// Загружаем состояние при запуске
+loadUpdateState();
+
+if (readyToRestart) {
+  readyToRestart = false;
+  justUpdated = true;
+  saveUpdateState();
+  logDebug("[Update State] Перезапуск после обновления успешен, сброшен readyToRestart, установлен justUpdated = true");
+}
+
+// Если только что обновились, запускаем сброс флага через 15 секунд
+if (justUpdated) {
+  setTimeout(() => {
+    justUpdated = false;
+    saveUpdateState();
+    logDebug("[Update State] Флаг justUpdated сброшен по таймауту.");
+  }, 15000);
+}
+
+function isVersionNewer(local, remote) {
+  const lParts = String(local).split('.').map(Number);
+  const rParts = String(remote).split('.').map(Number);
+  for (let i = 0; i < Math.max(lParts.length, rParts.length); i++) {
+    const l = lParts[i] || 0;
+    const r = rParts[i] || 0;
+    if (r > l) return true;
+    if (l > r) return false;
+  }
+  return false;
+}
+
+async function checkUpdatesBackground() {
+  try {
+    logDebug("[Background Check] Проверка обновлений...");
+    if (!fsSync.existsSync(path.join(REPO_DIR, ".git"))) {
+      logDebug(`[Background Check Error] Директория ${REPO_DIR} не является Git-репозиторием.`);
+      return;
+    }
+    
+    try {
+      await execPromise("git fetch origin", { cwd: REPO_DIR });
+    } catch (fetchErr) {
+      logDebug(`[Background Check] Ошибка git fetch: ${fetchErr.message}`);
+    }
+    
+    let targetLatest = localVersion;
+    
+    // 1. Проверяем версию на гитхабе
+    try {
+      const { stdout } = await execPromise("git show origin/main:version.json", { cwd: REPO_DIR });
+      const vData = JSON.parse(stdout);
+      if (vData.version) targetLatest = vData.version;
+    } catch (e) {
+      logDebug(`[Background Check] Не удалось прочитать версию из origin: ${e.message}`);
+    }
+    
+    // 2. Проверяем версию в локальном репозитории (вдруг она новее)
+    const repoVersionPath = path.join(REPO_DIR, "version.json");
+    if (fsSync.existsSync(repoVersionPath)) {
+      try {
+        const rvData = JSON.parse(fsSync.readFileSync(repoVersionPath, 'utf8'));
+        if (rvData.version && isVersionNewer(targetLatest, rvData.version)) {
+          targetLatest = rvData.version;
+        }
+      } catch (e) {}
+    }
+    
+    if (isVersionNewer(localVersion, targetLatest)) {
+      updateAvailable = true;
+      latestVersion = targetLatest;
+      logDebug(`[Background Check] Доступно обновление с v${localVersion} до v${latestVersion}`);
+    } else {
+      updateAvailable = false;
+      latestVersion = localVersion;
+      logDebug(`[Background Check] Обновлений нет. Текущая версия v${localVersion} актуальна (последняя: v${targetLatest}).`);
+    }
+    saveUpdateState();
+  } catch (err) {
+    logDebug(`[Background Check Error] Не удалось проверить обновления: ${err.message}`);
+  }
+}
+
 logDebug("Запуск MCP-сервера расширений AntiGravity (antigravity-features)...");
 
 // Автоматическая проверка и восстановление патча app.asar
@@ -38,15 +179,18 @@ try {
   logDebug("Проверка целостности патча локализации...");
   const patchResult = require('child_process').spawnSync('node', [path.join(__dirname, 'auto_patcher.cjs')]);
   if (patchResult.status === 1) {
-    logDebug("app.asar был успешно пропатчен. Инициируем перезапуск...");
-    const scratchRestartPath = require('path').join(require('os').homedir(), '.gemini', 'antigravity', 'scratch', 'restart_app.cmd');
-    require('child_process').exec(`wmic process call create "cmd.exe /c ${scratchRestartPath}"`, { cwd: __dirname });
-    // Даем время на выполнение команды до завершения процесса
-    setTimeout(() => process.exit(0), 1000);
+    logDebug("app.asar был успешно пропатчен. Требуется перезапуск, устанавливаем patchNeedsRestart = true...");
+    patchNeedsRestart = true;
+    saveUpdateState();
   } else if (patchResult.status === 2) {
     logDebug("Ошибка автопатчера: " + patchResult.stderr.toString());
   } else {
     logDebug("Патч локализации присутствует, продолжаем запуск.");
+    if (patchNeedsRestart) {
+      patchNeedsRestart = false;
+      saveUpdateState();
+      logDebug("[Update State] Перезапуск после патча успешен, сброшен patchNeedsRestart");
+    }
   }
 } catch (err) {
   logDebug("Ошибка при вызове автопатчера: " + err.message);
@@ -81,8 +225,8 @@ server.tool(
           localVersion = vData.version || "1.0.0";
       }
 
-      await execPromise("git fetch origin");
-      const { stdout } = await execPromise("git status -uno");
+      await execPromise("git fetch origin", { cwd: REPO_DIR });
+      const { stdout } = await execPromise("git status -uno", { cwd: REPO_DIR });
       let remoteVersion = localVersion;
       
       if (stdout.includes("Your branch is behind")) {
@@ -113,7 +257,7 @@ server.tool(
   "Скачать и применить новые словари локализации с GitHub",
   async () => {
     try {
-      await execPromise("git pull origin main");
+      await execPromise("git pull origin main", { cwd: REPO_DIR });
       return { content: [{ type: "text", text: "Обновление успешно скачано! Новые словари будут применяться автоматически в новых окнах." }] };
     } catch (e) {
       return { content: [{ type: "text", text: `Ошибка установки обновления: ${e.message}` }] };
@@ -354,20 +498,83 @@ try {
 }
 const restoredOrigins = new Set();
 
+async function triggerSelfUpdate() {
+  if (isUpdating) return;
+  isUpdating = true;
+  saveUpdateState();
+  
+  try {
+    logDebug("[Self Update] Начало процесса обновления...");
+    // 1. Выполняем git pull
+    await execPromise("git pull origin main", { cwd: REPO_DIR });
+    
+    // 2. Считываем обновленную версию из version.json
+    let newVersion = localVersion;
+    const versionPath = path.join(__dirname, "version.json");
+    if (fsSync.existsSync(versionPath)) {
+      try {
+        const vData = JSON.parse(fsSync.readFileSync(versionPath, 'utf8'));
+        newVersion = vData.version || localVersion;
+      } catch (e) {}
+    }
+    
+    logDebug(`[Self Update] Обновление успешно скачано. Новая версия: ${newVersion}`);
+    
+    // 3. Копируем файлы в папку запуска
+    const srcIndex = path.join(__dirname, "index.js");
+    const destIndex = path.join(userProfileDir, ".gemini", "antigravity", "mcp-servers", "antigravity-features", "index.js");
+    fsSync.copyFileSync(srcIndex, destIndex);
+    logDebug("[Self Update] index.js успешно скопирован в папку запуска.");
+    
+    const filesToCopy = ["version.json", "localization_injected.js", "auto_patcher.cjs"];
+    filesToCopy.forEach(f => {
+      const srcF = path.join(__dirname, f);
+      const destF = path.join(userProfileDir, ".gemini", "antigravity", "mcp-servers", "antigravity-features", f);
+      if (fsSync.existsSync(srcF)) {
+        fsSync.copyFileSync(srcF, destF);
+      }
+    });
+    
+    // 4. Устанавливаем флаги успешного завершения (готово к перезапуску)
+    readyToRestart = true;
+    isUpdating = false;
+    updateAvailable = false;
+    latestVersion = newVersion;
+    saveUpdateState();
+    
+    logDebug("[Self Update] Копирование завершено. Ожидаем подтверждения перезапуска пользователем в интерфейсе.");
+  } catch (err) {
+    logDebug(`[Self Update Error] Ошибка обновления: ${err.message}`);
+    isUpdating = false;
+    saveUpdateState();
+  }
+}
+
 let isInjecting = false;
 
 async function runUIInjection() {
+  logDebug(`[Injector] Запуск runUIInjection, isInjecting = ${isInjecting}`);
   if (isInjecting) return;
   isInjecting = true;
   try {
     const portFile = path.join(userProfileDir, "AppData", "Roaming", "Antigravity", "DevToolsActivePort");
-    if (!fsSync.existsSync(portFile)) return;
+    if (!fsSync.existsSync(portFile)) {
+      if (global.__last_port_warn !== 'not_found') {
+        global.__last_port_warn = 'not_found';
+        logDebug(`[Injector] Файл DevToolsActivePort не найден по пути: ${portFile}`);
+      }
+      return;
+    }
     
     const content = await fs.readFile(portFile, "utf8");
     const lines = content.split("\n").filter(l => l.trim());
     const port = parseInt(lines[0], 10);
     
     const targets = await CDPListWithTimeout({ port }, 3000).catch((err) => {
+      if (global.__last_cdp_err !== err.message) {
+        global.__last_cdp_err = err.message;
+        logDebug(`[Injector Error] Ошибка CDP List на порту ${port}: ${err.message}`);
+      }
       return null;
     });
     if (!targets) return;
@@ -430,47 +637,235 @@ async function runUIInjection() {
         try {
            const name = "antigravity-features";
            const version = "${localVersion}";
-           const elements = Array.from(document.querySelectorAll('*'));
-           let targetParent = null;
-           const titleEl = elements.find(el => {
-              if (el.textContent.trim() !== name) return false;
-              let p = el.parentElement;
-              while(p) {
-                 if(p.classList.contains('font-semibold')) {
-                     targetParent = p;
-                     return true;
-                 }
-                 p = p.parentElement;
-              }
-              return false;
-           });
+           const updateAvailable = ${updateAvailable};
+           const isUpdating = ${isUpdating};
+           const justUpdated = ${justUpdated};
+           const readyToRestart = ${readyToRestart};
+           const patchNeedsRestart = ${patchNeedsRestart};
+           const latestVersion = "${latestVersion}";
            
-           if (targetParent) {
-              if (!targetParent.hasAttribute('data-has-ag-badge')) {
-                  targetParent.setAttribute('data-has-ag-badge', 'true');
-                  
-                  const container = document.createElement('span');
-                  container.id = 'ag-features-badges-container';
-                  container.style.cssText = 'display: inline-flex; align-items: center; margin-left: 8px; gap: 6px;';
-                  
-                  const versionBadge = document.createElement('span');
-                  versionBadge.id = 'ag-features-version-badge';
-                  versionBadge.style.cssText = 'background: #333; color: #aaa; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; font-family: monospace; border: 1px solid #444;';
-                  
-                  const statusBadge = document.createElement('span');
-                  statusBadge.id = 'ag-features-status-badge';
-                  statusBadge.style.cssText = 'background: #1b5e20; color: #a5d6a7; border: 1px solid #2e7d32; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; transition: all 0.3s;';
-                  statusBadge.textContent = 'Актуально';
-                  
-                  container.appendChild(versionBadge);
-                  container.appendChild(statusBadge);
-                  
-                  targetParent.appendChild(container);
+           function renderFeatureBadge() {
+              const elements = Array.from(document.querySelectorAll('*'));
+              
+              const titleEl = elements.find(el => {
+                const text = el.textContent.trim();
+                const cleanText = text.replace(/[\\s\\u2022\\u00a0]/g, '');
+                const cleanName = name.replace(/[\\s\\u2022\\u00a0]/g, '');
+                if (text !== name && cleanText !== cleanName) return false;
+                
+                if (el.tagName !== 'SPAN' && el.tagName !== 'DIV') return false;
+                
+                const className = el.className || '';
+                if (typeof className !== 'string' || !className.includes('truncate')) return false;
+                
+                const p = el.parentElement;
+                if (!p || p.tagName !== 'DIV') return false;
+                const pClass = p.className || '';
+                if (typeof pClass !== 'string' || !pClass.includes('flex')) return false;
+                
+                const gp = p.parentElement;
+                if (!gp || gp.tagName !== 'DIV') return false;
+                
+                // Дедушка должен содержать слово "tools"
+                const gpText = gp.textContent || '';
+                if (!/tools/i.test(gpText)) return false;
+                
+                const ggp = gp.parentElement;
+                if (!ggp || ggp.tagName !== 'DIV') return false;
+                const ggpClass = ggp.className || '';
+                if (typeof ggpClass !== 'string' || !ggpClass.includes('group')) return false;
+                
+                return true;
+              });
+              
+              if (!titleEl) {
+                window.__antigravity_features_badge_result = "Элемент '" + name + "' не найден в DOM";
+                return null;
               }
-              const badgeEl = targetParent.querySelector('#ag-features-version-badge');
-              if (badgeEl) badgeEl.textContent = 'v' + version;
+              
+              const dotEl = Array.from(titleEl.parentNode.children).find(child => {
+                if (child === titleEl) return false;
+                const style = window.getComputedStyle(child);
+                const isCircle = style.borderRadius === '50%' || 
+                                 (style.borderRadius && style.borderRadius.includes('px') && parseInt(style.borderRadius) > 0) ||
+                                 child.getAttribute('style')?.includes('border-radius');
+                
+                const hasDotClass = Array.from(child.classList).some(c => 
+                  c.includes('dot') || c.includes('indicator') || c.includes('status') || c.includes('circle')
+                );
+                return isCircle || hasDotClass;
+              });
+              
+              let container = titleEl.parentNode.querySelector('.antigravity-features-version-container');
+              if (!container) {
+                container = document.createElement('span');
+                container.className = 'antigravity-features-version-container';
+                container.style.marginLeft = '12px';
+                container.style.display = 'inline-flex';
+                container.style.alignItems = 'center';
+                container.style.gap = '8px';
+                container.style.fontSize = '12px';
+                container.style.verticalAlign = 'middle';
+                
+                const badge = document.createElement('span');
+                badge.className = 'mcp-version-badge';
+                badge.style.padding = '1px 6px';
+                badge.style.borderRadius = '3px';
+                badge.style.fontFamily = 'monospace';
+                badge.style.fontSize = '10px';
+                container.appendChild(badge);
+                
+                const updateBtn = document.createElement('button');
+                updateBtn.className = 'mcp-update-btn';
+                updateBtn.style.setProperty('border', 'none', 'important');
+                updateBtn.style.setProperty('padding', '2px 8px', 'important');
+                updateBtn.style.setProperty('border-radius', '3px', 'important');
+                updateBtn.style.setProperty('font-size', '10px', 'important');
+                updateBtn.style.setProperty('font-weight', 'bold', 'important');
+                updateBtn.style.setProperty('line-height', '1.2', 'important');
+                updateBtn.style.setProperty('transition', 'all 0.2s', 'important');
+                container.appendChild(updateBtn);
+                
+                let insertAfterEl = titleEl;
+                if (dotEl) {
+                  insertAfterEl = dotEl;
+                }
+                
+                insertAfterEl.parentNode.insertBefore(container, insertAfterEl.nextSibling);
+              }
+              
+              // Обновляем версию и цвета версии
+              const badgeEl = container.querySelector('.mcp-version-badge');
+              if (badgeEl) {
+                 if (isUpdating) {
+                   badgeEl.textContent = 'v' + version + ' (Обновление...)';
+                   badgeEl.style.setProperty('background', '#4a3728', 'important');
+                   badgeEl.style.setProperty('color', '#ffb07c', 'important');
+                   badgeEl.style.setProperty('border', '1px solid #d46b28', 'important');
+                 } else if (justUpdated) {
+                   badgeEl.textContent = 'v' + version + ' (Обновлено! 🎉)';
+                   badgeEl.style.setProperty('background', '#1b5e20', 'important');
+                   badgeEl.style.setProperty('color', '#a5d6a7', 'important');
+                   badgeEl.style.setProperty('border', '1px solid #2e7d32', 'important');
+                 } else if (readyToRestart) {
+                   badgeEl.textContent = 'v' + version + ' (Ожидает перезапуска)';
+                   badgeEl.style.setProperty('background', '#1a3a5f', 'important');
+                   badgeEl.style.setProperty('color', '#adc6ff', 'important');
+                   badgeEl.style.setProperty('border', '1px solid #1d3b6a', 'important');
+                 } else if (patchNeedsRestart) {
+                   badgeEl.textContent = 'v' + version + ' (Патч ожидает перезапуска)';
+                   badgeEl.style.setProperty('background', '#4d3300', 'important');
+                   badgeEl.style.setProperty('color', '#ffe0b2', 'important');
+                   badgeEl.style.setProperty('border', '1px solid #ff9800', 'important');
+                 } else {
+                   badgeEl.textContent = 'v' + version;
+                   badgeEl.style.setProperty('background', '#2a2a2a', 'important');
+                   badgeEl.style.setProperty('color', '#888', 'important');
+                   badgeEl.style.setProperty('border', '1px solid #444', 'important');
+                 }
+              }
+              
+              const updateBtnEl = container.querySelector('.mcp-update-btn');
+              if (updateBtnEl) {
+                 if (isUpdating) {
+                   updateBtnEl.disabled = true;
+                   updateBtnEl.style.setProperty('cursor', 'default', 'important');
+                   updateBtnEl.style.setProperty('background', '#555', 'important');
+                   updateBtnEl.style.setProperty('color', '#ccc', 'important');
+                   updateBtnEl.style.setProperty('border', 'none', 'important');
+                   updateBtnEl.textContent = 'Обновление...';
+                   updateBtnEl.onclick = null;
+                 } else if (readyToRestart) {
+                   updateBtnEl.disabled = false;
+                   updateBtnEl.style.setProperty('cursor', 'pointer', 'important');
+                   updateBtnEl.style.setProperty('background', '#e67e22', 'important');
+                   updateBtnEl.style.setProperty('color', '#fff', 'important');
+                   updateBtnEl.style.setProperty('border', 'none', 'important');
+                   updateBtnEl.textContent = 'Перезапустить для v' + latestVersion;
+                   updateBtnEl.onclick = (e) => {
+                     e.stopPropagation();
+                     if (confirm("Все файлы обновления подготовлены.\\n\\nПерезапустить Antigravity сейчас?")) {
+                       window.__antigravity_pending_action = 'restart';
+                     }
+                   };
+                 } else if (patchNeedsRestart) {
+                   updateBtnEl.disabled = false;
+                   updateBtnEl.style.setProperty('cursor', 'pointer', 'important');
+                   updateBtnEl.style.setProperty('background', '#d35400', 'important');
+                   updateBtnEl.style.setProperty('color', '#fff', 'important');
+                   updateBtnEl.style.setProperty('border', 'none', 'important');
+                   updateBtnEl.textContent = 'Перезапустить (Патч)';
+                   updateBtnEl.onclick = (e) => {
+                     e.stopPropagation();
+                     if (confirm("Патч локализации ядра успешно применен.\\n\\nПерезапустить Antigravity для активации перевода?")) {
+                       window.__antigravity_pending_action = 'restart';
+                     }
+                   };
+                 } else if (updateAvailable) {
+                   updateBtnEl.disabled = false;
+                   updateBtnEl.style.setProperty('cursor', 'pointer', 'important');
+                   updateBtnEl.style.setProperty('background', '#1a73e8', 'important');
+                   updateBtnEl.style.setProperty('color', '#fff', 'important');
+                   updateBtnEl.style.setProperty('border', 'none', 'important');
+                   updateBtnEl.textContent = 'Обновить до v' + latestVersion;
+                   
+                   updateBtnEl.onclick = (e) => {
+                     e.stopPropagation();
+                     if (confirm("Начать процесс подготовки файлов обновления?\\n\\nПосле скачивания потребуется подтвердить перезапуск IDE.")) {
+                       updateBtnEl.textContent = 'Обновление...';
+                       updateBtnEl.disabled = true;
+                       updateBtnEl.style.setProperty('background', '#555', 'important');
+                       updateBtnEl.style.setProperty('color', '#ccc', 'important');
+                       window.__antigravity_pending_action = 'update';
+                     }
+                   };
+                 } else {
+                   updateBtnEl.disabled = true;
+                   updateBtnEl.style.setProperty('cursor', 'default', 'important');
+                   updateBtnEl.style.setProperty('background', '#222', 'important');
+                   updateBtnEl.style.setProperty('color', '#555', 'important');
+                   updateBtnEl.style.setProperty('border', '1px solid #333', 'important');
+                   updateBtnEl.textContent = 'Актуально';
+                   updateBtnEl.onclick = null;
+                 }
+              }
+              
+              window.__antigravity_features_badge_result = "Рендеринг выполнен (updateAvailable: " + updateAvailable + ")";
+              return null;
            }
-        } catch(err) {}
+           
+           window.__antigravity_features_render = renderFeatureBadge;
+           renderFeatureBadge();
+           
+           if (!window.__antigravity_features_ui_observer) {
+             window.__antigravity_features_ui_observer = new MutationObserver(() => {
+               if (window.__antigravity_features_ui_timer) clearTimeout(window.__antigravity_features_ui_timer);
+               window.__antigravity_features_ui_timer = setTimeout(() => {
+                 if (window.__antigravity_features_render) window.__antigravity_features_render();
+               }, 200);
+             });
+             window.__antigravity_features_ui_observer.observe(document.documentElement, {
+               childList: true,
+               subtree: true
+             });
+             window.addEventListener('popstate', () => {
+               if (window.__antigravity_features_render) window.__antigravity_features_render();
+             });
+             setInterval(() => {
+               if (window.__antigravity_features_render) window.__antigravity_features_render();
+             }, 1000);
+           }
+           
+           const action = window.__antigravity_pending_action || null;
+           if (action) {
+             window.__antigravity_pending_action = null;
+           }
+           return action;
+        } catch(err) {
+           window.__antigravity_features_debug_elements_error = "Критическая ошибка скрипта: " + err.message + "\\n" + err.stack;
+           console.error("Error rendering features badge:", err);
+           return null;
+        }
       })()
     `;
 
@@ -525,15 +920,87 @@ async function runUIInjection() {
         }
 
         // 2. Обычная инжекция скрипта локализации
+        let actionTriggered = null;
         if (!injectedPages.has(targetUrl)) {
           if (pageDomain) {
             await pageDomain.addScriptToEvaluateOnNewDocument({ source: injectionScript });
           }
           const evaluatePromise = pageRuntime.evaluate({ expression: injectionScript, returnByValue: true });
           const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("evaluate timeout")), 5000));
-          await Promise.race([evaluatePromise, timeoutPromise]);
+          const evalRes = await Promise.race([evaluatePromise, timeoutPromise]);
+          if (evalRes && evalRes.result && evalRes.result.value) {
+            actionTriggered = evalRes.result.value;
+          }
           injectedPages.add(targetUrl);
           logDebug(`[Injector] Успешная инжекция на странице: "${page.title}"`);
+        } else {
+          // Оптимизированный опрос состояния
+          const queryScript = `
+            (() => {
+              if (window.__antigravity_features_render) {
+                return window.__antigravity_features_render();
+              }
+              return null;
+            })()
+          `;
+          const evaluatePromise = pageRuntime.evaluate({ expression: queryScript, returnByValue: true });
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("evaluate timeout")), 2000));
+          const evalRes = await Promise.race([evaluatePromise, timeoutPromise]);
+          if (evalRes && evalRes.result && evalRes.result.value) {
+            actionTriggered = evalRes.result.value;
+          }
+        }
+
+        if (actionTriggered) {
+          if (actionTriggered === "update") {
+            logDebug("[Injector] Получен сигнал на запуск обновления!");
+            triggerSelfUpdate();
+          } else if (actionTriggered === "restart") {
+            logDebug("[Injector] Получен сигнал на перезапуск IDE!");
+            const scratchRestartPath = path.join(userProfileDir, ".gemini", "antigravity", "scratch", "restart_app.cmd");
+            if (fsSync.existsSync(scratchRestartPath)) {
+              require('child_process').exec(`wmic process call create "cmd.exe /c ${scratchRestartPath}"`, { cwd: __dirname });
+            }
+          }
+        }
+
+        // 2.5. Сбор и вывод отладочной информации о DOM
+        try {
+          const debugEval = await pageRuntime.evaluate({
+            expression: `(() => {
+              return JSON.stringify({
+                elements: window.__antigravity_features_debug_elements || null,
+                err: window.__antigravity_features_debug_elements_error || null,
+                badgeResult: window.__antigravity_features_badge_result || null
+              });
+            })()`,
+            returnByValue: true
+          }).catch(() => null);
+
+          if (debugEval && debugEval.result && debugEval.result.value) {
+            const debugData = JSON.parse(debugEval.result.value);
+            if (debugData.elements && debugData.elements.length > 0) {
+              const debugStr = JSON.stringify(debugData.elements);
+              if (global.__last_dom_debug !== debugStr) {
+                global.__last_dom_debug = debugStr;
+                logDebug(`[Debug DOM] На странице "${page.title}" обнаружены элементы настроек:\n${JSON.stringify(debugData.elements, null, 2)}`);
+              }
+            }
+            if (debugData.err) {
+              if (global.__last_dom_err !== debugData.err) {
+                global.__last_dom_err = debugData.err;
+                logDebug(`[Debug DOM Error] Ошибка рендеринга на странице "${page.title}": ${debugData.err}`);
+              }
+            }
+            if (debugData.badgeResult) {
+              if (global.__last_badge_result !== debugData.badgeResult) {
+                global.__last_badge_result = debugData.badgeResult;
+                logDebug(`[Debug Badge] Результат на странице "${page.title}": ${debugData.badgeResult}`);
+              }
+            }
+          }
+        } catch (deErr) {
+          logDebug(`[Debug UI] Ошибка сбора отладки: ${deErr.message}`);
         }
 
         // 3. Автоматический бэкап Local Storage со страницы
@@ -1023,3 +1490,10 @@ const uiTimeout = setTimeout(runUIInjection, 1000);
 uiTimeout.unref();
 const uiInterval = setInterval(runUIInjection, 3000);
 uiInterval.unref();
+
+// Запуск проверки обновлений при старте (через 10 секунд)
+setTimeout(checkUpdatesBackground, 10000);
+
+// Периодическая проверка обновлений каждые 5 минут
+const updatesInterval = setInterval(checkUpdatesBackground, 300000);
+updatesInterval.unref();

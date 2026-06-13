@@ -25,9 +25,9 @@ try {
     let preloadContent = fs.readFileSync(preloadExtracted, 'utf8');
 
     const beginMarker = '// BEGIN ANTIGRAVITY TRANSLATION INJECTION';
-    if (preloadContent.includes(beginMarker)) {
-        console.log('[AutoPatcher] Found old preload injection, stripping it...');
-        preloadContent = preloadContent.substring(0, preloadContent.indexOf(beginMarker)).trim();
+    let originalPreload = preloadContent;
+    if (originalPreload.includes(beginMarker)) {
+        originalPreload = originalPreload.substring(0, originalPreload.indexOf(beginMarker)).trim();
     }
 
     const localizationCode = fs.readFileSync(localizationFile, 'utf8');
@@ -44,15 +44,17 @@ if (!window.__antigravity_translation_initialized) {
 }
 // END ANTIGRAVITY TRANSLATION INJECTION
 `;
-    fs.writeFileSync(preloadExtracted, preloadContent + '\n' + injectionCode);
+    const expectedPreload = originalPreload + '\n' + injectionCode;
 
     // --- PATCH UTILS.JS (WINDOW STATE) ---
     const utilsExtracted = path.join(tempDir, 'dist', 'utils.js');
+    let expectedUtils = null;
+    let utilsContent = "";
     if (fs.existsSync(utilsExtracted)) {
-        let utilsContent = fs.readFileSync(utilsExtracted, 'utf8');
-        if (!utilsContent.includes('ANTIGRAVITY WINDOW STATE PATCH')) {
-            console.log('[AutoPatcher] Patching utils.js for window state...');
-            utilsContent = utilsContent.replace('function createWindow(url) {', `function createWindow(url) {
+        utilsContent = fs.readFileSync(utilsExtracted, 'utf8');
+        let tempUtils = utilsContent;
+        if (!tempUtils.includes('ANTIGRAVITY WINDOW STATE PATCH')) {
+            tempUtils = tempUtils.replace('function createWindow(url) {', `function createWindow(url) {
 // ANTIGRAVITY WINDOW STATE PATCH
 const fsState = require('fs');
 const pathState = require('path');
@@ -60,8 +62,8 @@ const stateFile = pathState.join(require('electron').app.getPath('userData'), 'a
 let windowState = {};
 try { if (fsState.existsSync(stateFile)) windowState = JSON.parse(fsState.readFileSync(stateFile, 'utf8')); } catch(e){}
 `);
-            utilsContent = utilsContent.replace('        width: 1400,\n        height: 900,', `        width: windowState.width || 1400,\n        height: windowState.height || 900,\n        x: windowState.x,\n        y: windowState.y,`);
-            utilsContent = utilsContent.replace('devTools: !electron_1.app.isPackaged,\n        },\n    });', `devTools: !electron_1.app.isPackaged,\n        },\n    });
+            tempUtils = tempUtils.replace('        width: 1400,\n        height: 900,', `        width: windowState.width || 1400,\n        height: windowState.height || 900,\n        x: windowState.x,\n        y: windowState.y,`);
+            tempUtils = tempUtils.replace('devTools: !electron_1.app.isPackaged,\n        },\n    });', `devTools: !electron_1.app.isPackaged,\n        },\n    });
     // Restore maximized state and save on close
     if (windowState.isMaximized) win.maximize();
     win.on('close', () => {
@@ -71,10 +73,8 @@ try { if (fsState.existsSync(stateFile)) windowState = JSON.parse(fsState.readFi
             fsState.writeFileSync(stateFile, JSON.stringify(Object.assign({}, bounds, { isMaximized })));
         }
     });`);
-            fs.writeFileSync(utilsExtracted, utilsContent);
-        } else if (!utilsContent.includes("win.on('close'")) {
-            console.log('[AutoPatcher] Fixing incomplete utils.js patch...');
-            utilsContent = utilsContent.replace('devTools: !electron_1.app.isPackaged,\n        },\n    });', `devTools: !electron_1.app.isPackaged,\n        },\n    });
+        } else if (!tempUtils.includes("win.on('close'")) {
+            tempUtils = tempUtils.replace('devTools: !electron_1.app.isPackaged,\n        },\n    });', `devTools: !electron_1.app.isPackaged,\n        },\n    });
     // Restore maximized state and save on close
     if (windowState.isMaximized) win.maximize();
     win.on('close', () => {
@@ -84,8 +84,25 @@ try { if (fsState.existsSync(stateFile)) windowState = JSON.parse(fsState.readFi
             fsState.writeFileSync(stateFile, JSON.stringify(Object.assign({}, bounds, { isMaximized })));
         }
     });`);
-            fs.writeFileSync(utilsExtracted, utilsContent);
         }
+        expectedUtils = tempUtils;
+    }
+
+    // Проверяем, изменился ли контент (убирая влияние CRLF/LF на Windows)
+    const cleanStr = (str) => str ? str.replace(/\r/g, '').trim() : '';
+    const preloadChanged = cleanStr(preloadContent) !== cleanStr(expectedPreload);
+    const utilsChanged = expectedUtils !== null && cleanStr(utilsContent) !== cleanStr(expectedUtils);
+
+    if (!preloadChanged && !utilsChanged) {
+        console.log('[AutoPatcher] app.asar is already patched and up-to-date.');
+        fs.rmSync(tempDir, { recursive: true, force: true });
+        process.exit(0); // 0 means patch is already up to date, no restart required
+    }
+
+    console.log('[AutoPatcher] Applying patch changes...');
+    fs.writeFileSync(preloadExtracted, expectedPreload);
+    if (expectedUtils !== null) {
+        fs.writeFileSync(utilsExtracted, expectedUtils);
     }
 
     console.log('[AutoPatcher] Packing new ASAR...');
