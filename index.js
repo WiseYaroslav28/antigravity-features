@@ -416,6 +416,11 @@ server.connect(transport).catch(err => {
   logDebug(`Ошибка подключения транспорта: ${err.message}`);
 });
 
+process.stdin.on('close', () => {
+  logDebug("[Lifecycle] stdin закрыт. Завершение процесса...");
+  process.exit(0);
+});
+
 // Хелпер для CDPList с таймаутом
 function CDPListWithTimeout(options, timeoutMs = 3000) {
   return new Promise((resolve, reject) => {
