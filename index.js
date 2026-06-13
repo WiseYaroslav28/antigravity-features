@@ -139,7 +139,7 @@ async function checkUpdatesBackground() {
     
     // 1. Проверяем версию на гитхабе
     try {
-      const { stdout } = await execPromise("git show origin/main:version.json", { cwd: REPO_DIR });
+      const { stdout } = await execPromise("git show origin/master:version.json", { cwd: REPO_DIR });
       const vData = JSON.parse(stdout);
       if (vData.version) targetLatest = vData.version;
     } catch (e) {
@@ -257,7 +257,7 @@ server.tool(
   "Скачать и применить новые словари локализации с GitHub",
   async () => {
     try {
-      await execPromise("git pull origin main", { cwd: REPO_DIR });
+      await execPromise("git pull origin master", { cwd: REPO_DIR });
       return { content: [{ type: "text", text: "Обновление успешно скачано! Новые словари будут применяться автоматически в новых окнах." }] };
     } catch (e) {
       return { content: [{ type: "text", text: `Ошибка установки обновления: ${e.message}` }] };
@@ -506,11 +506,11 @@ async function triggerSelfUpdate() {
   try {
     logDebug("[Self Update] Начало процесса обновления...");
     // 1. Выполняем git pull
-    await execPromise("git pull origin main", { cwd: REPO_DIR });
+    await execPromise("git pull origin master", { cwd: REPO_DIR });
     
     // 2. Считываем обновленную версию из version.json
     let newVersion = localVersion;
-    const versionPath = path.join(__dirname, "version.json");
+    const versionPath = path.join(REPO_DIR, "version.json");
     if (fsSync.existsSync(versionPath)) {
       try {
         const vData = JSON.parse(fsSync.readFileSync(versionPath, 'utf8'));
@@ -521,14 +521,14 @@ async function triggerSelfUpdate() {
     logDebug(`[Self Update] Обновление успешно скачано. Новая версия: ${newVersion}`);
     
     // 3. Копируем файлы в папку запуска
-    const srcIndex = path.join(__dirname, "index.js");
+    const srcIndex = path.join(REPO_DIR, "index.js");
     const destIndex = path.join(userProfileDir, ".gemini", "antigravity", "mcp-servers", "antigravity-features", "index.js");
     fsSync.copyFileSync(srcIndex, destIndex);
     logDebug("[Self Update] index.js успешно скопирован в папку запуска.");
     
     const filesToCopy = ["version.json", "localization_injected.js", "auto_patcher.cjs"];
     filesToCopy.forEach(f => {
-      const srcF = path.join(__dirname, f);
+      const srcF = path.join(REPO_DIR, f);
       const destF = path.join(userProfileDir, ".gemini", "antigravity", "mcp-servers", "antigravity-features", f);
       if (fsSync.existsSync(srcF)) {
         fsSync.copyFileSync(srcF, destF);
