@@ -170,8 +170,26 @@ async function triggerRefreshViaCDP() {
               const mcpServers = ['antigravity-features'];
               
               mcpServers.forEach(srvName => {
+                const isElementInSidebarOrHeader = (el) => {
+                  let p = el.parentElement;
+                  while (p) {
+                    const className = p.className || '';
+                    if (typeof className === 'string') {
+                      if (className.includes('sidebar') || className.includes('bg-sidebar') || className.includes('header') || className.includes('titlebar')) {
+                        return true;
+                      }
+                    }
+                    p = p.parentElement;
+                  }
+                  return false;
+                };
+
                 const serverTitle = Array.from(document.querySelectorAll('*'))
-                   .find(el => el.textContent.trim() === srvName && !Array.from(el.children).some(c => c.textContent.trim() === srvName));
+                   .find(el => {
+                     if (el.textContent.trim() !== srvName) return false;
+                     if (Array.from(el.children).some(c => c.textContent.trim() === srvName)) return false;
+                     return !isElementInSidebarOrHeader(el);
+                   });
                 
                 if (serverTitle) {
                   let parent = serverTitle.parentElement;
@@ -179,6 +197,14 @@ async function triggerRefreshViaCDP() {
                     const btn = Array.from(parent.querySelectorAll('button, div, span'))
                       .find(el => {
                         const txt = (el.textContent || '').trim();
+                        const lowerTxt = txt.toLowerCase();
+                        if (lowerTxt.includes('open ide') || lowerTxt.includes('open edi') || lowerTxt.includes('open-editor') || lowerTxt.includes('editor')) {
+                          return false; // Полный запрет на клики по редакторам
+                        }
+                        const testId = el.getAttribute('data-testid') || '';
+                        if (testId.includes('open-editor') || testId.includes('open-ide') || testId.includes('editor')) {
+                          return false;
+                        }
                         const isRefresh = txt.includes('Refresh') || txt.includes('Обновить') || txt.includes('Reload') || txt.includes('Перезагрузить');
                         const hasAria = el.getAttribute('aria-label')?.includes('Refresh') || el.getAttribute('aria-label')?.includes('Reload');
                         const hasClass = typeof el.className === 'string' && (el.className.includes('refresh') || el.className.includes('reload'));
