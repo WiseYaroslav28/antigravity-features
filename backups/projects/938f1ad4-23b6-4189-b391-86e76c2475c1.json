@@ -1,0 +1,20 @@
+{
+  "id":  "938f1ad4-23b6-4189-b391-86e76c2475c1",
+  "name":  "Прочее",
+  "projectResources":  {},
+  "permissionGrants":  {
+    "permissionGrants":  {
+      "allow":  [
+        "read_file(C:\\Users\\wisey\\.gemini\\antigravity\\mcp_config.json)",
+        "write_file(C:\\Users\\wisey\\.gemini\\config\\skills\\codex-bridge-skill\\SKILL.md)",
+        "write_file(C:\\Users\\wisey\\.gemini\\antigravity\\mcp_config.json)"
+      ]
+    }
+  },
+  "settings":  {
+    "fileAccessPolicy":  "AGENT_SETTING_POLICY_ASK",
+    "internetPolicy":  "AGENT_SETTING_POLICY_ASK",
+    "autoExecutionPolicy":  "CASCADE_COMMANDS_AUTO_EXECUTION_OFF",
+    "artifactReviewMode":  "ARTIFACT_REVIEW_MODE_ALWAYS"
+  }
+}

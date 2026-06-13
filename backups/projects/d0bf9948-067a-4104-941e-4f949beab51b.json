@@ -1,0 +1,23 @@
+{
+  "id":  "d0bf9948-067a-4104-941e-4f949beab51b",
+  "name":  "voice-server",
+  "projectResources":  {
+    "resources":  [
+      {
+        "gitFolder":  {
+          "folderUri":  "file:///c%3A/Antigravity%20projects/voice-server",
+          "defaultBranch":  "master"
+        }
+      }
+    ]
+  },
+  "permissionGrants":  {
+    "permissionGrants":  {}
+  },
+  "settings":  {
+    "fileAccessPolicy":  "AGENT_SETTING_POLICY_ALLOW",
+    "internetPolicy":  "AGENT_SETTING_POLICY_ASK",
+    "autoExecutionPolicy":  "CASCADE_COMMANDS_AUTO_EXECUTION_EAGER",
+    "artifactReviewMode":  "ARTIFACT_REVIEW_MODE_ALWAYS"
+  }
+}

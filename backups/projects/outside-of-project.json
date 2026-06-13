@@ -1,0 +1,15 @@
+{
+  "id":  "outside-of-project",
+  "name":  "Outside of Project",
+  "permissionGrants":  {
+    "permissionGrants":  {
+      "allow":  [
+        "write_file(C:\\Users\\wisey\\.gemini\\antigravity\\mcp_config.json)"
+      ]
+    }
+  },
+  "settings":  {
+    "fileAccessPolicy":  "AGENT_SETTING_POLICY_ASK",
+    "autoExecutionPolicy":  "CASCADE_COMMANDS_AUTO_EXECUTION_OFF"
+  }
+}

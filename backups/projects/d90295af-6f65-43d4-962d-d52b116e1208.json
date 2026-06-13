@@ -1,0 +1,17 @@
+{
+  "id":  "d90295af-6f65-43d4-962d-d52b116e1208",
+  "name":  "antigravity-features",
+  "projectResources":  {
+    "resources":  [
+      {
+        "folderUri":  "file:///c%3A/Antigravity%20projects/antigravity-features"
+      }
+    ]
+  },
+  "settings":  {
+    "fileAccessPolicy":  "AGENT_SETTING_POLICY_ALLOW",
+    "internetPolicy":  "AGENT_SETTING_POLICY_ASK",
+    "autoExecutionPolicy":  "CASCADE_COMMANDS_AUTO_EXECUTION_OFF",
+    "artifactReviewMode":  "ARTIFACT_REVIEW_MODE_ALWAYS"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "antigravity-features",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "chrome-remote-interface": "^0.34.0"
+  }
+}

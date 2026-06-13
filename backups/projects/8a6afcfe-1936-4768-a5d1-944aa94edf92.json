@@ -1,0 +1,20 @@
+{
+  "id":  "8a6afcfe-1936-4768-a5d1-944aa94edf92",
+  "name":  "optimistic-bell",
+  "projectResources":  {
+    "resources":  [
+      {
+        "gitFolder":  {
+          "folderUri":  "file:///C:/Users/wisey/Documents/antigravity/optimistic-bell",
+          "defaultBranch":  "master"
+        }
+      }
+    ]
+  },
+  "settings":  {
+    "fileAccessPolicy":  "AGENT_SETTING_POLICY_ASK",
+    "internetPolicy":  "AGENT_SETTING_POLICY_ASK",
+    "autoExecutionPolicy":  "CASCADE_COMMANDS_AUTO_EXECUTION_OFF",
+    "artifactReviewMode":  "ARTIFACT_REVIEW_MODE_ALWAYS"
+  }
+}
