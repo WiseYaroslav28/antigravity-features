@@ -418,10 +418,23 @@ server.connect(transport).catch(err => {
   logDebug(`Ошибка подключения транспорта: ${err.message}`);
 });
 
+const cleanExit = () => {
+  logDebug("[Lifecycle] Получен сигнал выхода. Мягкое завершение...");
+  process.exit(0);
+};
+
 process.stdin.on('close', () => {
   logDebug("[Lifecycle] stdin закрыт. Завершение процесса...");
   process.exit(0);
 });
+
+process.stdin.on('end', () => {
+  logDebug("[Lifecycle] stdin завершен. Завершение процесса...");
+  process.exit(0);
+});
+
+process.on('SIGTERM', cleanExit);
+process.on('SIGINT', cleanExit);
 
 // Хелпер для CDPList с таймаутом
 function CDPListWithTimeout(options, timeoutMs = 3000) {

@@ -265,6 +265,45 @@ async function triggerRefreshViaCDP() {
                 return 'clicked_' + clickedCount + '_servers';
               }
               
+              // Если конкретная кнопка сервера не найдена, ищем по заголовку панели настроек
+              const mcpHeaders = ['Installed MCP Servers', 'MCP Servers', 'MCP серверы', 'Установленные MCP серверы', 'Customizations', 'Настройки'];
+              for (const headerText of mcpHeaders) {
+                const headerEl = Array.from(document.querySelectorAll('*'))
+                  .find(el => el.textContent.trim().includes(headerText) && !Array.from(el.children).some(c => c.textContent.trim().includes(headerText)));
+                if (headerEl) {
+                  let parent = headerEl.parentElement;
+                  for (let i = 0; i < 4 && parent; i++) {
+                    const btn = Array.from(parent.querySelectorAll('button, div, span'))
+                      .find(el => {
+                        const txt = (el.textContent || '').trim();
+                        const isRefresh = txt.includes('Refresh') || txt.includes('Обновить') || txt.includes('Reload') || txt.includes('Перезагрузить');
+                        const hasAria = el.getAttribute('aria-label')?.includes('Refresh') || el.getAttribute('aria-label')?.includes('Reload');
+                        const hasClass = typeof el.className === 'string' && (el.className.includes('refresh') || el.className.includes('reload'));
+                        return (isRefresh || hasAria || hasClass) && el !== headerEl && !el.className?.includes('mcp-update-btn') && !el.className?.includes('mcp-version-badge');
+                      });
+                    if (btn) {
+                      simulateClick(btn);
+                      return 'clicked_by_header_' + headerText;
+                    }
+                    parent = parent.parentElement;
+                  }
+                }
+              }
+
+              // Глобальный поиск любой кнопки Refresh/Обновить в DOM (исключая кастомные кнопки обновлений)
+              const globalBtn = Array.from(document.querySelectorAll('button, div, span'))
+                .find(el => {
+                  const txt = el.textContent || '';
+                  const isRefreshBtn = txt.includes('Refresh') || txt.includes('Обновить');
+                  const hasIconOrAction = el.getAttribute('aria-label')?.includes('Refresh') || el.className?.includes('refresh');
+                  const isNotCustom = !el.className?.includes('mcp-update-btn') && !el.className?.includes('mcp-version-badge') && !el.className?.includes('antigravity-version-container');
+                  return (isRefreshBtn || hasIconOrAction) && isNotCustom;
+                });
+              if (globalBtn) {
+                simulateClick(globalBtn);
+                return 'clicked_globally';
+              }
+
               return 'not_found';
             })()`,
             returnByValue: true
@@ -369,15 +408,28 @@ async function runUpdate() {
     // 1. Временно отключаем сервер
     disableServerInConfig();
     
-    // Мягко останавливаем родительский процесс, а затем жестко завершаем его через taskkill
-    writeLog('Ожидание мягкой остановки родительского процесса IDE...');
+    // Ожидаем мягкой остановки родительского процесса IDE (3 секунды) после изменения конфига
+    writeLog('Ожидание мягкой остановки родительского процесса IDE (3 секунды)...');
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    let parentDead = false;
     try {
-      require('child_process').execSync(`taskkill /F /PID ${parentPid}`);
-      writeLog(`Родительский процесс ${parentPid} принудительно завершен.`);
-    } catch (killErr) {
-      writeLog(`Предупреждение: не удалось завершить родительский процесс ${parentPid}: ${killErr.message}`);
+      process.kill(parentPid, 0);
+    } catch (e) {
+      parentDead = true;
     }
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    if (!parentDead) {
+      writeLog(`[Warning] Родительский процесс ${parentPid} всё еще активен после 3 секунд. Принудительно завершаем через taskkill...`);
+      try {
+        require('child_process').execSync(`taskkill /F /PID ${parentPid}`);
+        writeLog(`Родительский процесс ${parentPid} принудительно завершен.`);
+      } catch (killErr) {
+        writeLog(`Не удалось завершить родительский процесс ${parentPid}: ${killErr.message}`);
+      }
+    } else {
+      writeLog(`Родительский процесс ${parentPid} успешно завершился самостоятельно (мягкий выход).`);
+    }
     
     // 3. Выполняем обновление репозитория
     updateDbStatus('updating', 'Получение обновлений из Git... 📥');

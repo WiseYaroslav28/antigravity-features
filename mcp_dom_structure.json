@@ -1,0 +1,1544 @@
+[
+  {
+    "text": "antigravity-features",
+    "tag": "DIV",
+    "class": "flex items-center gap-0 pl-1 pr-0.5 h-8 shrink-0 rounded-lg select-none hover:bg-muted text-muted-foreground hover:text-secondary-foreground cursor-pointer",
+    "parentChain": [
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-px group/section",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-1",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-3",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 min-h-0 overflow-y-auto flex flex-col gap-6 px-2 py-3",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full flex flex-col pb-2 bg-sidebar",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-row min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-screen w-screen flex flex-col bg-background text-foreground",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full flex items-center relative",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col h-full min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full dark",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-screen h-screen overflow-hidden",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": "root"
+      },
+      {
+        "tag": "BODY",
+        "class": "theme-standalone dark dark-theme theme-dark",
+        "id": ""
+      },
+      {
+        "tag": "HTML",
+        "class": "",
+        "id": ""
+      }
+    ]
+  },
+  {
+    "text": "antigravity-features",
+    "tag": "DIV",
+    "class": "flex-1 min-w-0 flex justify-start h-full",
+    "parentChain": [
+      {
+        "tag": "DIV",
+        "class": "flex items-center gap-0 pl-1 pr-0.5 h-8 shrink-0 rounded-lg select-none hover:bg-muted text-muted-foreground hover:text-secondary-foreground cursor-pointer",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-px group/section",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-1",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-3",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 min-h-0 overflow-y-auto flex flex-col gap-6 px-2 py-3",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full flex flex-col pb-2 bg-sidebar",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-row min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-screen w-screen flex flex-col bg-background text-foreground",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full flex items-center relative",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col h-full min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full dark",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-screen h-screen overflow-hidden",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": "root"
+      },
+      {
+        "tag": "BODY",
+        "class": "theme-standalone dark dark-theme theme-dark",
+        "id": ""
+      },
+      {
+        "tag": "HTML",
+        "class": "",
+        "id": ""
+      }
+    ]
+  },
+  {
+    "text": "antigravity-features",
+    "tag": "DIV",
+    "class": "flex items-center gap-0.5 h-full min-w-0",
+    "parentChain": [
+      {
+        "tag": "DIV",
+        "class": "flex-1 min-w-0 flex justify-start h-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-center gap-0 pl-1 pr-0.5 h-8 shrink-0 rounded-lg select-none hover:bg-muted text-muted-foreground hover:text-secondary-foreground cursor-pointer",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-px group/section",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-1",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-3",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 min-h-0 overflow-y-auto flex flex-col gap-6 px-2 py-3",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full flex flex-col pb-2 bg-sidebar",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-row min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-screen w-screen flex flex-col bg-background text-foreground",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full flex items-center relative",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col h-full min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full dark",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-screen h-screen overflow-hidden",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": "root"
+      },
+      {
+        "tag": "BODY",
+        "class": "theme-standalone dark dark-theme theme-dark",
+        "id": ""
+      },
+      {
+        "tag": "HTML",
+        "class": "",
+        "id": ""
+      }
+    ]
+  },
+  {
+    "text": "antigravity-features",
+    "tag": "DIV",
+    "class": "flex items-baseline overflow-hidden gap-1.5 min-w-0",
+    "parentChain": [
+      {
+        "tag": "DIV",
+        "class": "flex items-center gap-0.5 h-full min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 min-w-0 flex justify-start h-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-center gap-0 pl-1 pr-0.5 h-8 shrink-0 rounded-lg select-none hover:bg-muted text-muted-foreground hover:text-secondary-foreground cursor-pointer",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-px group/section",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-1",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-3",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 min-h-0 overflow-y-auto flex flex-col gap-6 px-2 py-3",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full flex flex-col pb-2 bg-sidebar",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-row min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-screen w-screen flex flex-col bg-background text-foreground",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full flex items-center relative",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col h-full min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full dark",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-screen h-screen overflow-hidden",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": "root"
+      },
+      {
+        "tag": "BODY",
+        "class": "theme-standalone dark dark-theme theme-dark",
+        "id": ""
+      },
+      {
+        "tag": "HTML",
+        "class": "",
+        "id": ""
+      }
+    ]
+  },
+  {
+    "text": "antigravity-features",
+    "tag": "DIV",
+    "class": "text-sm font-medium truncate m-0",
+    "parentChain": [
+      {
+        "tag": "DIV",
+        "class": "flex items-baseline overflow-hidden gap-1.5 min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-center gap-0.5 h-full min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 min-w-0 flex justify-start h-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-center gap-0 pl-1 pr-0.5 h-8 shrink-0 rounded-lg select-none hover:bg-muted text-muted-foreground hover:text-secondary-foreground cursor-pointer",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-px group/section",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-1",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-3",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 min-h-0 overflow-y-auto flex flex-col gap-6 px-2 py-3",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full flex flex-col pb-2 bg-sidebar",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-row min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-screen w-screen flex flex-col bg-background text-foreground",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full flex items-center relative",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col h-full min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full dark",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-screen h-screen overflow-hidden",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": "root"
+      },
+      {
+        "tag": "BODY",
+        "class": "theme-standalone dark dark-theme theme-dark",
+        "id": ""
+      },
+      {
+        "tag": "HTML",
+        "class": "",
+        "id": ""
+      }
+    ]
+  },
+  {
+    "text": "antigravity-features",
+    "tag": "SPAN",
+    "class": "text-sm px-1.5 h-6 flex items-center min-w-0 overflow-hidden cursor-pointer hover:bg-secondary rounded-lg transition-[background-color] opacity-70 hover:opacity-100 transition-opacity",
+    "parentChain": [
+      {
+        "tag": "DIV",
+        "class": "flex items-center min-w-0 overflow-hidden shrink-[2]",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-center whitespace-nowrap overflow-hidden min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-center min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-center gap-1 min-w-0 pl-2",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full flex items-center justify-between select-none overflow-hidden min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full flex justify-between items-center bg-background overflow-hidden min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "shrink-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex flex-col min-w-0 h-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-row min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-screen w-screen flex flex-col bg-background text-foreground",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full flex items-center relative",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col h-full min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full dark",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-screen h-screen overflow-hidden",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": "root"
+      },
+      {
+        "tag": "BODY",
+        "class": "theme-standalone dark dark-theme theme-dark",
+        "id": ""
+      },
+      {
+        "tag": "HTML",
+        "class": "",
+        "id": ""
+      }
+    ]
+  },
+  {
+    "text": "antigravity-features",
+    "tag": "SPAN",
+    "class": "truncate inline-block",
+    "parentChain": [
+      {
+        "tag": "SPAN",
+        "class": "text-sm px-1.5 h-6 flex items-center min-w-0 overflow-hidden cursor-pointer hover:bg-secondary rounded-lg transition-[background-color] opacity-70 hover:opacity-100 transition-opacity",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-center min-w-0 overflow-hidden shrink-[2]",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-center whitespace-nowrap overflow-hidden min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-center min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-center gap-1 min-w-0 pl-2",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full flex items-center justify-between select-none overflow-hidden min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full flex justify-between items-center bg-background overflow-hidden min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "shrink-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex flex-col min-w-0 h-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-row min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-screen w-screen flex flex-col bg-background text-foreground",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full flex items-center relative",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col h-full min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full dark",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-screen h-screen overflow-hidden",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": "root"
+      },
+      {
+        "tag": "BODY",
+        "class": "theme-standalone dark dark-theme theme-dark",
+        "id": ""
+      },
+      {
+        "tag": "HTML",
+        "class": "",
+        "id": ""
+      }
+    ]
+  },
+  {
+    "text": "StitchMCP",
+    "tag": "CODE",
+    "class": "whitespace-pre-wrap",
+    "parentChain": [
+      {
+        "tag": "P",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "leading-relaxed select-text text-sm flex flex-col [&_code:not(pre_code)]:bg-code-background [&_code:not(pre_code)]:text-code-foreground [&_code:not(pre_code)]:rounded [&_code:not(pre_code)]:px-1 [&_code:not(pre_code)]:py-0.5 [&_code:not(pre_code)]:text-[0.9em] [&_summary]:cursor-pointer [&_h1]:text-xl [&_h2]:text-lg [&_h3]:text-base [&_h4]:text-sm [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-medium [&_h4]:font-medium [&_h1]:!mb-2 [&_h1]:!mt-6 [&_h2]:!mb-2 [&_h2]:!mt-6 [&_h3]:!mb-1 [&_h3]:!mt-3 [&_h4]:!mb-1 [&_h4]:!mt-3 [&_li.task-list-item]:list-none [&_ul:has(li.task-list-item)]:list-none [&_ul]:my-2 [&_ol]:my-2 [&>ul.contains-task-list]:pl-0 [&>ol.contains-task-list]:pl-0 [&_ul]:pl-10 [&_ol]:pl-10 [&>ul:not(.contains-task-list)]:!pl-4 [&>ol:not(.contains-task-list)]:!pl-4 [&_ul]:list-disc [&_ol]:list-decimal [&_li.task-checked>.task-checked-content]:opacity-50 break-words gap-2",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "px-2 py-1",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-0.5 group w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-start",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative flex flex-col gap-y-3 px-4",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "mx-auto w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full overflow-y-auto min-h-0 w-full h-full overflow-y-auto min-h-0 w-full scrollbar-hide",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-full flex-grow min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full flex h-full min-h-0 flex-col items-center relative overflow-y-auto",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-col min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none flex-col",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none flex-col",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex flex-col min-w-0 h-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-row min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-screen w-screen flex flex-col bg-background text-foreground",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full flex items-center relative",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col h-full min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full dark",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-screen h-screen overflow-hidden",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": "root"
+      },
+      {
+        "tag": "BODY",
+        "class": "theme-standalone dark dark-theme theme-dark",
+        "id": ""
+      },
+      {
+        "tag": "HTML",
+        "class": "",
+        "id": ""
+      }
+    ]
+  },
+  {
+    "text": "antigravity-mcp-bridge",
+    "tag": "CODE",
+    "class": "whitespace-pre-wrap",
+    "parentChain": [
+      {
+        "tag": "P",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "leading-relaxed select-text text-sm flex flex-col [&_code:not(pre_code)]:bg-code-background [&_code:not(pre_code)]:text-code-foreground [&_code:not(pre_code)]:rounded [&_code:not(pre_code)]:px-1 [&_code:not(pre_code)]:py-0.5 [&_code:not(pre_code)]:text-[0.9em] [&_summary]:cursor-pointer [&_h1]:text-xl [&_h2]:text-lg [&_h3]:text-base [&_h4]:text-sm [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-medium [&_h4]:font-medium [&_h1]:!mb-2 [&_h1]:!mt-6 [&_h2]:!mb-2 [&_h2]:!mt-6 [&_h3]:!mb-1 [&_h3]:!mt-3 [&_h4]:!mb-1 [&_h4]:!mt-3 [&_li.task-list-item]:list-none [&_ul:has(li.task-list-item)]:list-none [&_ul]:my-2 [&_ol]:my-2 [&>ul.contains-task-list]:pl-0 [&>ol.contains-task-list]:pl-0 [&_ul]:pl-10 [&_ol]:pl-10 [&>ul:not(.contains-task-list)]:!pl-4 [&>ol:not(.contains-task-list)]:!pl-4 [&_ul]:list-disc [&_ol]:list-decimal [&_li.task-checked>.task-checked-content]:opacity-50 break-words gap-2",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "px-2 py-1",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-0.5 group w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-start",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative flex flex-col gap-y-3 px-4",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "mx-auto w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full overflow-y-auto min-h-0 w-full h-full overflow-y-auto min-h-0 w-full scrollbar-hide",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-full flex-grow min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full flex h-full min-h-0 flex-col items-center relative overflow-y-auto",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-col min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none flex-col",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none flex-col",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex flex-col min-w-0 h-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-row min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-screen w-screen flex flex-col bg-background text-foreground",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full flex items-center relative",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col h-full min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full dark",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-screen h-screen overflow-hidden",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": "root"
+      },
+      {
+        "tag": "BODY",
+        "class": "theme-standalone dark dark-theme theme-dark",
+        "id": ""
+      },
+      {
+        "tag": "HTML",
+        "class": "",
+        "id": ""
+      }
+    ]
+  },
+  {
+    "text": "antigravity-features",
+    "tag": "CODE",
+    "class": "whitespace-pre-wrap",
+    "parentChain": [
+      {
+        "tag": "LI",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "UL",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "LI",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "OL",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "leading-relaxed select-text text-sm flex flex-col [&_code:not(pre_code)]:bg-code-background [&_code:not(pre_code)]:text-code-foreground [&_code:not(pre_code)]:rounded [&_code:not(pre_code)]:px-1 [&_code:not(pre_code)]:py-0.5 [&_code:not(pre_code)]:text-[0.9em] [&_summary]:cursor-pointer [&_h1]:text-xl [&_h2]:text-lg [&_h3]:text-base [&_h4]:text-sm [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-medium [&_h4]:font-medium [&_h1]:!mb-2 [&_h1]:!mt-6 [&_h2]:!mb-2 [&_h2]:!mt-6 [&_h3]:!mb-1 [&_h3]:!mt-3 [&_h4]:!mb-1 [&_h4]:!mt-3 [&_li.task-list-item]:list-none [&_ul:has(li.task-list-item)]:list-none [&_ul]:my-2 [&_ol]:my-2 [&>ul.contains-task-list]:pl-0 [&>ol.contains-task-list]:pl-0 [&_ul]:pl-10 [&_ol]:pl-10 [&>ul:not(.contains-task-list)]:!pl-4 [&>ol:not(.contains-task-list)]:!pl-4 [&_ul]:list-disc [&_ol]:list-decimal [&_li.task-checked>.task-checked-content]:opacity-50 break-words gap-2",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "px-2 py-1",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-0.5 group w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-start",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative flex flex-col gap-y-3 px-4",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "mx-auto w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full overflow-y-auto min-h-0 w-full h-full overflow-y-auto min-h-0 w-full scrollbar-hide",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-full flex-grow min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full flex h-full min-h-0 flex-col items-center relative overflow-y-auto",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-col min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none flex-col",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none flex-col",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex flex-col min-w-0 h-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-row min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-screen w-screen flex flex-col bg-background text-foreground",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full flex items-center relative",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col h-full min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full dark",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-screen h-screen overflow-hidden",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": "root"
+      },
+      {
+        "tag": "BODY",
+        "class": "theme-standalone dark dark-theme theme-dark",
+        "id": ""
+      },
+      {
+        "tag": "HTML",
+        "class": "",
+        "id": ""
+      }
+    ]
+  },
+  {
+    "text": "antigravity-features",
+    "tag": "CODE",
+    "class": "whitespace-pre-wrap",
+    "parentChain": [
+      {
+        "tag": "LI",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "UL",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "LI",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "OL",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "leading-relaxed select-text text-sm flex flex-col [&_code:not(pre_code)]:bg-code-background [&_code:not(pre_code)]:text-code-foreground [&_code:not(pre_code)]:rounded [&_code:not(pre_code)]:px-1 [&_code:not(pre_code)]:py-0.5 [&_code:not(pre_code)]:text-[0.9em] [&_summary]:cursor-pointer [&_h1]:text-xl [&_h2]:text-lg [&_h3]:text-base [&_h4]:text-sm [&_h1]:font-semibold [&_h2]:font-semibold [&_h3]:font-medium [&_h4]:font-medium [&_h1]:!mb-2 [&_h1]:!mt-6 [&_h2]:!mb-2 [&_h2]:!mt-6 [&_h3]:!mb-1 [&_h3]:!mt-3 [&_h4]:!mb-1 [&_h4]:!mt-3 [&_li.task-list-item]:list-none [&_ul:has(li.task-list-item)]:list-none [&_ul]:my-2 [&_ol]:my-2 [&>ul.contains-task-list]:pl-0 [&>ol.contains-task-list]:pl-0 [&_ul]:pl-10 [&_ol]:pl-10 [&>ul:not(.contains-task-list)]:!pl-4 [&>ol:not(.contains-task-list)]:!pl-4 [&_ul]:list-disc [&_ol]:list-decimal [&_li.task-checked>.task-checked-content]:opacity-50 break-words gap-2",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "px-2 py-1",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col gap-0.5 group w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex items-start",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative flex flex-col gap-y-3 px-4",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "mx-auto w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full overflow-y-auto min-h-0 w-full h-full overflow-y-auto min-h-0 w-full scrollbar-hide",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-full flex-grow min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full flex h-full min-h-0 flex-col items-center relative overflow-y-auto",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-col min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none flex-col",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none flex-col",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex flex-col min-w-0 h-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-grow h-full w-full flex-row min-w-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "border-border flex",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex w-full h-full outline-none",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex-1 flex min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-screen w-screen flex flex-col bg-background text-foreground",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "w-full h-full flex items-center relative",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "flex flex-col h-full min-h-0",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full dark",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "h-full w-full",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "relative w-screen h-screen overflow-hidden",
+        "id": ""
+      },
+      {
+        "tag": "DIV",
+        "class": "",
+        "id": "root"
+      },
+      {
+        "tag": "BODY",
+        "class": "theme-standalone dark dark-theme theme-dark",
+        "id": ""
+      },
+      {
+        "tag": "HTML",
+        "class": "",
+        "id": ""
+      }
+    ]
+  }
+]
