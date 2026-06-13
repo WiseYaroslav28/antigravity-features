@@ -266,7 +266,7 @@ async function triggerRefreshViaCDP() {
               }
               
               // Если конкретная кнопка сервера не найдена, ищем по заголовку панели настроек
-              const mcpHeaders = ['Installed MCP Servers', 'MCP Servers', 'MCP серверы', 'Установленные MCP серверы', 'Customizations', 'Настройки'];
+              const mcpHeaders = ['Installed MCP Servers', 'MCP Servers', 'MCP серверы', 'Установленные MCP серверы', 'Установленные серверы MCP', 'Customizations', 'Персонализация', 'Настройки'];
               for (const headerText of mcpHeaders) {
                 const headerEl = Array.from(document.querySelectorAll('*'))
                   .find(el => el.textContent.trim().includes(headerText) && !Array.from(el.children).some(c => c.textContent.trim().includes(headerText)));
@@ -408,19 +408,30 @@ async function runUpdate() {
     // 1. Временно отключаем сервер
     disableServerInConfig();
     
-    // Ожидаем мягкой остановки родительского процесса IDE (3 секунды) после изменения конфига
-    writeLog('Ожидание мягкой остановки родительского процесса IDE (3 секунды)...');
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    let parentDead = false;
+    // Создаем файл-флаг для мягкого завершения родительского процесса
+    const triggerPath = path.join(userProfile, '.gemini', 'antigravity', 'scratch', 'features_exit_trigger.tmp');
     try {
-      process.kill(parentPid, 0);
-    } catch (e) {
-      parentDead = true;
+      fs.writeFileSync(triggerPath, 'exit', 'utf8');
+      writeLog('[Self Update] Создан файл-флаг для мягкого завершения родителя.');
+    } catch (err) {
+      writeLog(`[Self Update Warning] Не удалось создать файл-флаг: ${err.message}`);
+    }
+    
+    // Ожидаем мягкой остановки родительского процесса IDE (до 8 секунд) после изменения конфига
+    writeLog('Ожидание мягкой остановки родительского процесса IDE (до 8 секунд)...');
+    let parentDead = false;
+    for (let i = 0; i < 16; i++) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      try {
+        process.kill(parentPid, 0);
+      } catch (e) {
+        parentDead = true;
+        break;
+      }
     }
     
     if (!parentDead) {
-      writeLog(`[Warning] Родительский процесс ${parentPid} всё еще активен после 3 секунд. Принудительно завершаем через taskkill...`);
+      writeLog(`[Warning] Родительский процесс ${parentPid} всё еще активен после 8 секунд. Принудительно завершаем через taskkill...`);
       try {
         require('child_process').execSync(`taskkill /F /PID ${parentPid}`);
         writeLog(`Родительский процесс ${parentPid} принудительно завершен.`);

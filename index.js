@@ -1516,6 +1516,19 @@ const backupInterval = setInterval(() => {
 }, 30000);
 backupInterval.unref();
 
+// Проверка файла-флага для мгновенного мягкого завершения процесса
+const EXIT_TRIGGER_FILE = path.join(userProfileDir, ".gemini", "antigravity", "scratch", "features_exit_trigger.tmp");
+const exitCheckInterval = setInterval(() => {
+  if (fsSync.existsSync(EXIT_TRIGGER_FILE)) {
+    try {
+      fsSync.unlinkSync(EXIT_TRIGGER_FILE);
+    } catch(e) {}
+    logDebug("[Lifecycle] Обнаружен файл-флаг выхода. Мягкое завершение процесса...");
+    process.exit(0);
+  }
+}, 1000);
+exitCheckInterval.unref();
+
 // Запускаем инжектор локализации раз в 3 секунды
 const uiTimeout = setTimeout(runUIInjection, 1000);
 uiTimeout.unref();

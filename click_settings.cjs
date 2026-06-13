@@ -27,27 +27,125 @@ CDP.List({ port }).then(async (targets) => {
   
   const expr = `
     (async () => {
-      const elements = Array.from(document.querySelectorAll('*'));
-      const settingsBtn = elements.find(el => el.textContent.trim().includes('Настройки') && el.tagName === 'DIV');
-      if (!settingsBtn) {
-        // попробуем найти любой элемент с текстом Настройки
-        const fallbackBtn = elements.find(el => el.textContent.trim().includes('Настройки'));
-        if (fallbackBtn) {
-          fallbackBtn.click();
-          return "clicked fallback";
-        }
-        return "not found";
+      function simulateClick(el) {
+        if (!el) return false;
+        el.click();
+        ['mousedown', 'mouseup', 'click'].forEach(eventType => {
+          const ev = new MouseEvent(eventType, { bubbles: true, cancelable: true, view: window });
+          el.dispatchEvent(ev);
+        });
+        return true;
       }
-      settingsBtn.click();
-      return "clicked main";
+
+      // Проверяем, открыты ли настройки (видна ли вкладка Приложение)
+      const appTab = document.querySelector('[data-testid="settings-nav-item-App"]');
+      const isSettingsOpen = appTab && appTab.offsetParent !== null;
+
+      if (!isSettingsOpen) {
+        console.log("Настройки закрыты. Открываем...");
+        const settingsBtn = document.querySelector('[data-testid="settings-button"]');
+        if (settingsBtn) {
+          simulateClick(settingsBtn);
+          // Ждем до 3 секунд появления вкладки Приложение
+          for (let i = 0; i < 30; i++) {
+            await new Promise(r => setTimeout(r, 100));
+            const tab = document.querySelector('[data-testid="settings-nav-item-App"]');
+            if (tab && tab.offsetParent !== null) {
+              console.log("Настройки открылись!");
+              break;
+            }
+          }
+        } else {
+          return "settings_button_not_found";
+        }
+      } else {
+        console.log("Настройки уже открыты.");
+      }
+
+      // Переходим на вкладку проекта antigravity-features
+      const projectTab = document.querySelector('[data-testid="settings-nav-item-antigravity-features"]');
+      if (projectTab) {
+        console.log("Кликаем по вкладке проекта...");
+        simulateClick(projectTab);
+        await new Promise(r => setTimeout(r, 1500));
+      } else {
+        return "project_tab_not_found";
+      }
+
+      // Скроллим правую панель вниз до заголовка "Инструменты MCP"
+      const headers = Array.from(document.querySelectorAll('*')).filter(el => {
+        const t = el.textContent.trim();
+        return (t === 'Инструменты MCP' || t === 'MCP Инструменты' || t === 'MCP Tools' || t === 'Инструменты') && !el.children.length;
+      });
+
+      let mcpHeader = headers.find(h => h.offsetParent !== null);
+      if (mcpHeader) {
+        console.log("Нашли видимый заголовок MCP, скроллим контейнер...");
+        mcpHeader.scrollIntoView({ block: 'center', behavior: 'instant' });
+        
+        // Дополнительно прокручиваем скроллируемый родительский контейнер до упора вниз
+        let scrollParent = mcpHeader.parentElement;
+        while (scrollParent && scrollParent.scrollHeight <= scrollParent.clientHeight) {
+          scrollParent = scrollParent.parentElement;
+        }
+        if (scrollParent) {
+          scrollParent.scrollTop = scrollParent.scrollHeight;
+          console.log("Прокрутили скролл-контейнер до упора: " + scrollParent.scrollTop);
+        }
+        await new Promise(r => setTimeout(r, 800));
+      } else {
+        console.log("Скроллим всю страницу вниз...");
+        window.scrollTo(0, document.body.scrollHeight);
+        await new Promise(r => setTimeout(r, 800));
+      }
+
+      // Ищем кнопку "Открыть" (или "Open")
+      let openBtn = null;
+      if (mcpHeader) {
+        let parent = mcpHeader.parentElement;
+        for (let i = 0; i < 4 && parent && !openBtn; i++) {
+          openBtn = Array.from(parent.querySelectorAll('button, div')).find(el => {
+            const t = el.textContent.trim();
+            return (t === 'Открыть' || t === 'Open') && el.offsetParent !== null;
+          });
+          parent = parent.parentElement;
+        }
+      }
+
+      if (!openBtn) {
+        openBtn = Array.from(document.querySelectorAll('button, div')).find(el => {
+          const t = el.textContent.trim();
+          return (t === 'Открыть' || t === 'Open') && el.offsetParent !== null;
+        });
+      }
+
+      if (openBtn) {
+        console.log("Кликаем кнопку Открыть...");
+        simulateClick(openBtn);
+        
+        // Ждем появления списка серверов (проверяем появление текста "StitchMCP" или "antigravity-mcp-bridge")
+        let listOpened = false;
+        for (let i = 0; i < 40; i++) {
+          await new Promise(r => setTimeout(r, 100));
+          const hasBridge = Array.from(document.querySelectorAll('*')).some(el => {
+            const t = el.textContent.trim();
+            return (t === 'antigravity-mcp-bridge' || t === 'StitchMCP') && el.offsetParent !== null;
+          });
+          if (hasBridge) {
+            listOpened = true;
+            break;
+          }
+        }
+        
+        return listOpened ? "mcp_tools_opened_successfully" : "mcp_list_not_rendered";
+      } else {
+        return "open_button_not_found";
+      }
     })()
   `;
   
   const res = await Runtime.evaluate({ expression: expr, awaitPromise: true, returnByValue: true });
-  console.log("Click result:", res.result.value);
-  
-  // Ждем открытия настроек
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  console.log("Workflow result:", res.result.value);
   
   console.log("Taking screenshot...");
   const screenshot = await Page.captureScreenshot({ format: 'png' });
