@@ -403,6 +403,15 @@ async function runUIInjection() {
     const projectsMap = await getProjectsMap();
     const projectsMapStr = JSON.stringify(projectsMap);
     
+    let localVersion = "1.0.0";
+    const versionPath = path.join(__dirname, "version.json");
+    if (fsSync.existsSync(versionPath)) {
+        try {
+            const vData = JSON.parse(fsSync.readFileSync(versionPath, 'utf8'));
+            localVersion = vData.version || "1.0.0";
+        } catch(e) {}
+    }
+    
     const injectionScript = `
       (() => {
         window.__antigravity_projects_map = ${projectsMapStr};
@@ -416,6 +425,52 @@ async function runUIInjection() {
                 console.error("Error in injected localization:", e);
             }
         }
+        
+        // Render Badge for antigravity-features
+        try {
+           const name = "antigravity-features";
+           const version = "${localVersion}";
+           const elements = Array.from(document.querySelectorAll('*'));
+           let targetParent = null;
+           const titleEl = elements.find(el => {
+              if (el.textContent.trim() !== name) return false;
+              let p = el.parentElement;
+              while(p) {
+                 if(p.classList.contains('font-semibold')) {
+                     targetParent = p;
+                     return true;
+                 }
+                 p = p.parentElement;
+              }
+              return false;
+           });
+           
+           if (targetParent) {
+              if (!targetParent.hasAttribute('data-has-ag-badge')) {
+                  targetParent.setAttribute('data-has-ag-badge', 'true');
+                  
+                  const container = document.createElement('span');
+                  container.id = 'ag-features-badges-container';
+                  container.style.cssText = 'display: inline-flex; align-items: center; margin-left: 8px; gap: 6px;';
+                  
+                  const versionBadge = document.createElement('span');
+                  versionBadge.id = 'ag-features-version-badge';
+                  versionBadge.style.cssText = 'background: #333; color: #aaa; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; font-family: monospace; border: 1px solid #444;';
+                  
+                  const statusBadge = document.createElement('span');
+                  statusBadge.id = 'ag-features-status-badge';
+                  statusBadge.style.cssText = 'background: #1b5e20; color: #a5d6a7; border: 1px solid #2e7d32; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 500; transition: all 0.3s;';
+                  statusBadge.textContent = 'Актуально';
+                  
+                  container.appendChild(versionBadge);
+                  container.appendChild(statusBadge);
+                  
+                  targetParent.appendChild(container);
+              }
+              const badgeEl = targetParent.querySelector('#ag-features-version-badge');
+              if (badgeEl) badgeEl.textContent = 'v' + version;
+           }
+        } catch(err) {}
       })()
     `;
 
