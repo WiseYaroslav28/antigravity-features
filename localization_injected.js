@@ -995,6 +995,10 @@ let isTranslating = false;
 function shouldIgnore(node) {
     let parent = node.parentElement;
     while (parent) {
+        const className = parent.className || '';
+        if (typeof className === 'string' && className.toLowerCase().includes('placeholder')) {
+            return false;
+        }
         const tagName = parent.tagName;
         if (tagName === 'PRE' || tagName === 'CODE' || tagName === 'TEXTAREA' || tagName === 'INPUT' || tagName === 'SCRIPT' || tagName === 'STYLE' || parent.contentEditable === 'true') {
             return true;
@@ -1007,7 +1011,6 @@ function shouldIgnore(node) {
             return false;
         }
 
-        const className = parent.className || '';
         if (typeof className === 'string') {
             const lowerClass = className.toLowerCase();
             if (
@@ -1430,7 +1433,14 @@ function stopObserving() {
 }
 
 function initLanguageSwitcher() {
-    if (document.getElementById('antigravity-lang-switcher')) return;
+    const existingSwitcher = document.getElementById('antigravity-lang-switcher');
+    if (existingSwitcher) {
+        existingSwitcher.remove();
+    }
+    const existingStyle = document.getElementById('antigravity-lang-switcher-style');
+    if (existingStyle) {
+        existingStyle.remove();
+    }
     
     const container = document.createElement('div');
     container.id = 'antigravity-lang-switcher';
@@ -1441,6 +1451,7 @@ function initLanguageSwitcher() {
     `;
     
     const style = document.createElement('style');
+    style.id = 'antigravity-lang-switcher-style';
     style.innerHTML = `
         .lang-switcher {
             position: fixed;

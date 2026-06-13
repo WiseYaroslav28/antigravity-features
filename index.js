@@ -636,13 +636,27 @@ async function runUIInjection() {
         // Render Badge for antigravity-features
         try {
            const name = "antigravity-features";
-           const version = "${localVersion}";
-           const updateAvailable = ${updateAvailable};
-           const isUpdating = ${isUpdating};
-           const justUpdated = ${justUpdated};
-           const readyToRestart = ${readyToRestart};
-           const patchNeedsRestart = ${patchNeedsRestart};
-           const latestVersion = "${latestVersion}";
+           
+           if (!window.__antigravity_features_state) {
+               window.__antigravity_features_state = {
+                   version: "${localVersion}",
+                   updateAvailable: ${updateAvailable},
+                   isUpdating: ${isUpdating},
+                   justUpdated: ${justUpdated},
+                   readyToRestart: ${readyToRestart},
+                   patchNeedsRestart: ${patchNeedsRestart},
+                   latestVersion: "${latestVersion}"
+               };
+           }
+           
+           const state = window.__antigravity_features_state;
+           const version = state.version;
+           const updateAvailable = state.updateAvailable;
+           const isUpdating = state.isUpdating;
+           const justUpdated = state.justUpdated;
+           const readyToRestart = state.readyToRestart;
+           const patchNeedsRestart = state.patchNeedsRestart;
+           const latestVersion = state.latestVersion;
            
            function renderFeatureBadge() {
               const elements = Array.from(document.querySelectorAll('*'));
@@ -919,9 +933,28 @@ async function runUIInjection() {
           restoredOrigins.add(pageOrigin);
         }
 
+        // Проверяем, инициализирован ли скрипт на странице (на случай перезагрузки страницы)
+        let needsInjection = !injectedPages.has(targetUrl);
+        if (!needsInjection) {
+          try {
+            const checkInit = await pageRuntime.evaluate({
+              expression: "!!window.__antigravity_translation_initialized",
+              returnByValue: true
+            });
+            if (!checkInit || !checkInit.result || !checkInit.result.value) {
+              needsInjection = true;
+              injectedPages.delete(targetUrl);
+              logDebug(`[Injector] Страница "${page.title}" была перезагружена, требуется повторная инжекция.`);
+            }
+          } catch (e) {
+            needsInjection = true;
+            injectedPages.delete(targetUrl);
+          }
+        }
+
         // 2. Обычная инжекция скрипта локализации
         let actionTriggered = null;
-        if (!injectedPages.has(targetUrl)) {
+        if (needsInjection) {
           if (pageDomain) {
             await pageDomain.addScriptToEvaluateOnNewDocument({ source: injectionScript });
           }
@@ -934,13 +967,26 @@ async function runUIInjection() {
           injectedPages.add(targetUrl);
           logDebug(`[Injector] Успешная инжекция на странице: "${page.title}"`);
         } else {
-          // Оптимизированный опрос состояния
+          // Оптимизированный опрос состояния с синхронизацией переменных и передачей кликов
           const queryScript = `
             (() => {
+              window.__antigravity_features_state = {
+                version: "${localVersion}",
+                updateAvailable: ${updateAvailable},
+                isUpdating: ${isUpdating},
+                justUpdated: ${justUpdated},
+                readyToRestart: ${readyToRestart},
+                patchNeedsRestart: ${patchNeedsRestart},
+                latestVersion: "${latestVersion}"
+              };
               if (window.__antigravity_features_render) {
-                return window.__antigravity_features_render();
+                window.__antigravity_features_render();
               }
-              return null;
+              const action = window.__antigravity_pending_action || null;
+              if (action) {
+                window.__antigravity_pending_action = null;
+              }
+              return action;
             })()
           `;
           const evaluatePromise = pageRuntime.evaluate({ expression: queryScript, returnByValue: true });
