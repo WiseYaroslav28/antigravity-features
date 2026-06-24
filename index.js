@@ -666,13 +666,38 @@ async function runUIInjection() {
                const readyToRestart = state.readyToRestart;
                const patchNeedsRestart = state.patchNeedsRestart;
                const latestVersion = state.latestVersion;
-              const elements = Array.from(document.querySelectorAll('*'));
-              
-              const titleEl = elements.find(el => {
-                const text = el.textContent.trim();
-                const cleanText = text.replace(/[\\s\\u2022\\u00a0]/g, '');
-                const cleanName = name.replace(/[\\s\\u2022\\u00a0]/g, '');
-                if (text !== name && cleanText !== cleanName) return false;
+              const hasSettingsParent = (el) => {
+                 let p = el.parentElement;
+                 while (p) {
+                   const className = p.className || '';
+                   if (typeof className === 'string' && className.includes('max-w-2xl')) {
+                     return true;
+                   }
+                   p = p.parentElement;
+                 }
+                 return false;
+               };
+
+               const hasToolsCheck = (el) => {
+                 let gp = el.parentElement ? el.parentElement.parentElement : null;
+                 if (gp) {
+                   const text = gp.textContent || '';
+                   if (text.includes('tools') || text.includes('Инструменты') || text.includes('инструментов')) {
+                     return true;
+                   }
+                 }
+                 return false;
+               };
+
+               const elements = Array.from(document.querySelectorAll('*'));
+               
+               const titleEl = elements.find(el => {
+                 const text = el.textContent.trim();
+                 const cleanText = text.replace(/[\\s\\u2022\\u00a0]/g, '');
+                 const cleanName = name.replace(/[\\s\\u2022\\u00a0]/g, '');
+                 if (text !== name && cleanText !== cleanName) return false;
+                 if (!hasSettingsParent(el)) return false;
+                 if (!hasToolsCheck(el)) return false;
                 
                 if (el.tagName !== 'SPAN' && el.tagName !== 'DIV') return false;
                 
