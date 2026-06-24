@@ -994,96 +994,57 @@ let isTranslating = false;
 
 function shouldIgnore(node) {
     let parent = node.parentElement;
+    let insideSoftIgnore = false;
+    
     while (parent) {
-        const className = parent.className || '';
-        if (typeof className === 'string' && className.toLowerCase().includes('placeholder')) {
-            return false;
-        }
         const tagName = parent.tagName;
-        if (tagName === 'PRE' || tagName === 'CODE' || tagName === 'TEXTAREA' || tagName === 'INPUT' || tagName === 'SCRIPT' || tagName === 'STYLE' || parent.contentEditable === 'true') {
+        const className = parent.className || '';
+        const isStringClass = typeof className === 'string';
+        const lowerClass = isStringClass ? className.toLowerCase() : '';
+        
+        // 1. Абсолютный игнор (Hard Ignore) — элементы редактора кода, логов, терминала
+        if (
+            tagName === 'PRE' || 
+            tagName === 'CODE' || 
+            tagName === 'TEXTAREA' || 
+            tagName === 'INPUT' || 
+            tagName === 'SCRIPT' || 
+            tagName === 'STYLE' || 
+            parent.contentEditable === 'true' ||
+            (isStringClass && (
+                lowerClass.includes('monaco-editor') || 
+                lowerClass.includes('view-lines') || 
+                lowerClass.includes('margin') || 
+                lowerClass.includes('minimap') || 
+                lowerClass.includes('terminal-container') || 
+                lowerClass.includes('xterm') ||
+                lowerClass.includes('terminal')
+            ))
+        ) {
             return true;
         }
         
-        if (tagName === 'BUTTON' || parent.getAttribute('role') === 'button') {
+        // 2. Мягкий игнор (Soft Ignore) — чат, markdown-блоки, вывод сообщений
+        if (isStringClass && (
+            lowerClass.includes('message-content') || 
+            lowerClass.includes('message-text') ||
+            lowerClass.includes('chat-output') ||
+            lowerClass.includes('markdown-body')
+        )) {
+            insideSoftIgnore = true;
+        }
+        
+        // 3. Явное исключение для интерактивных элементов внутри мягкого игнора.
+        // Если мы встретили кнопку, плейсхолдер или ссылку, мы можем разрешить их перевод,
+        // даже если они внутри чата. Но только если мы еще не наткнулись на Monaco Editor (который проверяется выше).
+        if (tagName === 'BUTTON' || parent.getAttribute('role') === 'button' || tagName === 'A') {
             return false;
         }
-        if (tagName === 'A' && !parent.closest('pre, code')) {
-            return false;
-        }
-
-        if (typeof className === 'string') {
-            const lowerClass = className.toLowerCase();
-            if (
-                lowerClass.includes('settings') || 
-                lowerClass.includes('modal') || 
-                lowerClass.includes('dialog') || 
-                lowerClass.includes('popup') || 
-                lowerClass.includes('dropdown') || 
-                lowerClass.includes('select') ||
-                lowerClass.includes('confirm') ||
-                lowerClass.includes('action') ||
-                lowerClass.includes('prompt') ||
-                lowerClass.includes('permission') ||
-                lowerClass.includes('card') ||
-                lowerClass.includes('drawer') ||
-                lowerClass.includes('panel') ||
-                lowerClass.includes('overlay') ||
-                lowerClass.includes('danger') ||
-                lowerClass.includes('zone') ||
-                lowerClass.includes('project') ||
-                lowerClass.includes('config') ||
-                lowerClass.includes('btn') ||
-                lowerClass.includes('button') ||
-                lowerClass.includes('customization') ||
-                lowerClass.includes('budget') ||
-                lowerClass.includes('tooltip') ||
-                lowerClass.includes('popover') ||
-                lowerClass.includes('switch') ||
-                lowerClass.includes('toggle') ||
-                lowerClass.includes('tab') ||
-                lowerClass.includes('tabs') ||
-                lowerClass.includes('menu') ||
-                lowerClass.includes('item') ||
-                lowerClass.includes('list') ||
-                lowerClass.includes('control') ||
-                lowerClass.includes('controls') ||
-                lowerClass.includes('header') ||
-                lowerClass.includes('footer') ||
-                lowerClass.includes('title') ||
-                lowerClass.includes('alert') ||
-                lowerClass.includes('banner') ||
-                lowerClass.includes('badge') ||
-                lowerClass.includes('info') ||
-                lowerClass.includes('helper') ||
-                lowerClass.includes('hint') ||
-                lowerClass.includes('step') ||
-                lowerClass.includes('result') ||
-                lowerClass.includes('results') ||
-                lowerClass.includes('artifact') ||
-                lowerClass.includes('artifacts') ||
-                lowerClass.includes('changed') ||
-                lowerClass.includes('change') ||
-                lowerClass.includes('background') ||
-                lowerClass.includes('task') ||
-                lowerClass.includes('tasks') ||
-                lowerClass.includes('media')
-            ) {
-                return false;
-            }
-            if (
-                lowerClass.includes('monaco-editor') || 
-                lowerClass.includes('view-lines') || 
-                lowerClass.includes('message-content') || 
-                lowerClass.includes('message-text') ||
-                lowerClass.includes('chat-output') ||
-                lowerClass.includes('markdown-body')
-            ) {
-                return true;
-            }
-        }
+        
         parent = parent.parentElement;
     }
-    return false;
+    
+    return insideSoftIgnore;
 }
 
 function isFileName(text, parent) {
@@ -1187,6 +1148,7 @@ function translateTextNode(node) {
 function translatePlaceholder(element) {
     try {
         if (!element || element.nodeType !== Node.ELEMENT_NODE || !element.getAttribute) return;
+        if (shouldIgnore(element)) return;
         if (element.tagName !== 'INPUT' && element.tagName !== 'TEXTAREA') return;
         const placeholder = element.getAttribute('placeholder');
         if (!placeholder) return;
@@ -1210,6 +1172,7 @@ function translatePlaceholder(element) {
 function translateTitle(element) {
     try {
         if (!element || element.nodeType !== Node.ELEMENT_NODE || !element.getAttribute) return;
+        if (shouldIgnore(element)) return;
         
         const title = element.getAttribute('title');
         if (title && typeof title === 'string') {
@@ -1384,6 +1347,12 @@ function startObserving() {
     
     try {
         translationObserver = new MutationObserver((mutations) => {
+            if (isTranslating) return;
+            
+            // Временно отключаем наблюдение, чтобы избежать бесконечного цикла из собственных изменений
+            stopObserving();
+            isTranslating = true;
+            
             try {
                 mutations.forEach((mutation) => {
                     if (mutation.type === 'attributes') {
@@ -1410,6 +1379,9 @@ function startObserving() {
                 });
             } catch (e) {
                 console.error('Error in MutationObserver loop:', e);
+            } finally {
+                isTranslating = false;
+                startObserving();
             }
         });
         
