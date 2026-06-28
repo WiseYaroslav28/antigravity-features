@@ -937,34 +937,6 @@ async function runUIInjection() {
           await pageDomain.enable();
         }
 
-        // 1. Синхронизация localStorage при первом подключении к Origin
-        if (!restoredOrigins.has(pageOrigin)) {
-          const originBackup = localStorageBackup[pageOrigin];
-          if (originBackup && Object.keys(originBackup).length > 0) {
-            const restoreScript = `
-              (() => {
-                const backup = ${JSON.stringify(originBackup)};
-                let changed = false;
-                for (const key in backup) {
-                  if (localStorage.getItem(key) !== backup[key]) {
-                    localStorage.setItem(key, backup[key]);
-                    changed = true;
-                  }
-                }
-                return changed;
-              })()
-            `;
-            const restoreResult = await pageRuntime.evaluate({ expression: restoreScript, returnByValue: true });
-            if (restoreResult && restoreResult.result && restoreResult.result.value === true) {
-              logDebug(`[Backup/Restore] Применены настройки localStorage для Origin ${pageOrigin}. Перезагружаем страницу...`);
-              await pageRuntime.evaluate({ expression: "window.location.reload()" });
-              restoredOrigins.add(pageOrigin);
-              await pageClient.close().catch(() => {});
-              continue; // Переходим к следующей странице, эта перезагружается
-            }
-          }
-          restoredOrigins.add(pageOrigin);
-        }
 
         // Проверяем, инициализирован ли скрипт на странице (на случай перезагрузки страницы)
         let needsInjection = !injectedPages.has(targetUrl);
@@ -1150,29 +1122,6 @@ async function runUIInjection() {
           logDebug(`[Crash Logger] Ошибка сбора логов Chromium: ${crashErr.message}`);
         }
 
-        // 3. Автоматический бэкап Local Storage со страницы
-        const backupScript = `
-          (() => {
-            const data = {};
-            for (let i = 0; i < localStorage.length; i++) {
-              const key = localStorage.key(i);
-              if (key !== 'antigravity_terminal_status') {
-                data[key] = localStorage.getItem(key);
-              }
-            }
-            return JSON.stringify(data);
-          })()
-        `;
-        const backupResult = await pageRuntime.evaluate({ expression: backupScript });
-        if (backupResult && backupResult.result && backupResult.result.value) {
-          const currentSettings = JSON.parse(backupResult.result.value);
-          const oldSettings = localStorageBackup[pageOrigin] || {};
-          if (JSON.stringify(currentSettings) !== JSON.stringify(oldSettings)) {
-            localStorageBackup[pageOrigin] = currentSettings;
-            fsSync.writeFileSync(LOCAL_STORAGE_BACKUP_PATH, JSON.stringify(localStorageBackup, null, 2), 'utf8');
-            logDebug(`[Backup/Restore] Автоматически обновлен бэкап localStorage на диске для Origin: ${pageOrigin}`);
-          }
-        }
 
       } catch (pageErr) {
         logDebug(`Ошибка инжекции/бэкапа на странице "${page.title}": ${pageErr.message}`);

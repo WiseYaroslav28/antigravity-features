@@ -1510,12 +1510,22 @@ function initLanguageSwitcher() {
     const btnEn = document.getElementById('lang-btn-en');
     const btnRu = document.getElementById('lang-btn-ru');
     
-    let currentLang = localStorage.getItem('antigravity_lang') || window.__antigravity_saved_lang || 'ru';
-    
-    // Принудительно сохраняем в localStorage, если взято из глобальной переменной
-    if (!localStorage.getItem('antigravity_lang')) {
+    let currentLang = localStorage.getItem('antigravity_lang');
+    const savedLang = window.__antigravity_saved_lang || 'ru';
+    if (!currentLang || currentLang !== savedLang) {
+        currentLang = savedLang;
         localStorage.setItem('antigravity_lang', currentLang);
     }
+    
+    // Каждые 500мс синхронизируем язык с глобальным состоянием бэкенда
+    setInterval(() => {
+        const extLang = window.__antigravity_saved_lang;
+        if (extLang && extLang !== currentLang) {
+            currentLang = extLang;
+            localStorage.setItem('antigravity_lang', currentLang);
+            updateUI();
+        }
+    }, 500);
     
     function updateUI() {
         if (currentLang === 'ru') {
