@@ -1028,9 +1028,11 @@ let translationObserver = null;
 let isTranslating = false;
 
 function shouldIgnore(node) {
-    let parent = node.parentElement;
-    let insideSoftIgnore = false;
+    if (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA') {
+        return false;
+    }
     
+    let parent = node.parentElement;
     while (parent) {
         const tagName = parent.tagName;
         const className = parent.className || '';
@@ -1041,8 +1043,6 @@ function shouldIgnore(node) {
         if (
             tagName === 'PRE' || 
             tagName === 'CODE' || 
-            tagName === 'TEXTAREA' || 
-            tagName === 'INPUT' || 
             tagName === 'SCRIPT' || 
             tagName === 'STYLE' || 
             parent.contentEditable === 'true' ||
@@ -1059,27 +1059,52 @@ function shouldIgnore(node) {
             return true;
         }
         
-        // 2. Мягкий игнор (Soft Ignore) — чат, markdown-блоки, вывод сообщений
+        // 2. Белый список (White List) для интерфейса настроек, кнопок и модалок.
+        // Переводим их сразу, даже если они внутри контейнера чата!
+        if (
+            tagName === 'BUTTON' || 
+            parent.getAttribute('role') === 'button' || 
+            tagName === 'A' ||
+            (isStringClass && (
+                lowerClass.includes('settings') || 
+                lowerClass.includes('modal') || 
+                lowerClass.includes('dialog') || 
+                lowerClass.includes('popup') || 
+                lowerClass.includes('dropdown') || 
+                lowerClass.includes('select') ||
+                lowerClass.includes('confirm') ||
+                lowerClass.includes('action') ||
+                lowerClass.includes('prompt') ||
+                lowerClass.includes('card') ||
+                lowerClass.includes('drawer') ||
+                lowerClass.includes('panel') ||
+                lowerClass.includes('overlay') ||
+                lowerClass.includes('btn') ||
+                lowerClass.includes('button') ||
+                lowerClass.includes('popover') ||
+                lowerClass.includes('switch') ||
+                lowerClass.includes('toggle') ||
+                lowerClass.includes('tab') ||
+                lowerClass.includes('menu') ||
+                lowerClass.includes('item')
+            ))
+        ) {
+            return false;
+        }
+        
+        // 3. Мягкий игнор (Soft Ignore) — чат, сообщения
         if (isStringClass && (
             lowerClass.includes('message-content') || 
             lowerClass.includes('message-text') ||
             lowerClass.includes('chat-output') ||
             lowerClass.includes('markdown-body')
         )) {
-            insideSoftIgnore = true;
-        }
-        
-        // 3. Явное исключение для интерактивных элементов внутри мягкого игнора.
-        // Если мы встретили кнопку, плейсхолдер или ссылку, мы можем разрешить их перевод,
-        // даже если они внутри чата. Но только если мы еще не наткнулись на Monaco Editor (который проверяется выше).
-        if (tagName === 'BUTTON' || parent.getAttribute('role') === 'button' || tagName === 'A') {
-            return false;
+            return true;
         }
         
         parent = parent.parentElement;
     }
-    
-    return insideSoftIgnore;
+    return false;
 }
 
 function isFileName(text, parent) {
