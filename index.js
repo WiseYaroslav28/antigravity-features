@@ -513,7 +513,14 @@ try {
   if (fsSync.existsSync(LOCAL_STORAGE_BACKUP_PATH)) {
     const content = fsSync.readFileSync(LOCAL_STORAGE_BACKUP_PATH, 'utf8').trim();
     if (content) {
-      localStorageBackup = JSON.parse(content);
+      const parsed = JSON.parse(content);
+      const isStructured = Object.keys(parsed).every(key => key.includes("://"));
+      if (isStructured) {
+        localStorageBackup = parsed;
+      } else {
+        logDebug(`[Backup/Restore] Обнаружен старый плоский формат бэкапа. Сбрасываем для перехода на Origin-структуру.`);
+        localStorageBackup = {};
+      }
     }
   }
 } catch (e) {
@@ -932,10 +939,11 @@ async function runUIInjection() {
 
         // 1. Синхронизация localStorage при первом подключении к Origin
         if (!restoredOrigins.has(pageOrigin)) {
-          if (Object.keys(localStorageBackup).length > 0) {
+          const originBackup = localStorageBackup[pageOrigin];
+          if (originBackup && Object.keys(originBackup).length > 0) {
             const restoreScript = `
               (() => {
-                const backup = ${JSON.stringify(localStorageBackup)};
+                const backup = ${JSON.stringify(originBackup)};
                 let changed = false;
                 for (const key in backup) {
                   if (localStorage.getItem(key) !== backup[key]) {
@@ -1158,10 +1166,11 @@ async function runUIInjection() {
         const backupResult = await pageRuntime.evaluate({ expression: backupScript });
         if (backupResult && backupResult.result && backupResult.result.value) {
           const currentSettings = JSON.parse(backupResult.result.value);
-          if (JSON.stringify(currentSettings) !== JSON.stringify(localStorageBackup)) {
-            localStorageBackup = currentSettings;
+          const oldSettings = localStorageBackup[pageOrigin] || {};
+          if (JSON.stringify(currentSettings) !== JSON.stringify(oldSettings)) {
+            localStorageBackup[pageOrigin] = currentSettings;
             fsSync.writeFileSync(LOCAL_STORAGE_BACKUP_PATH, JSON.stringify(localStorageBackup, null, 2), 'utf8');
-            logDebug(`[Backup/Restore] Автоматически обновлен бэкап localStorage на диске для: ${pageOrigin}`);
+            logDebug(`[Backup/Restore] Автоматически обновлен бэкап localStorage на диске для Origin: ${pageOrigin}`);
           }
         }
 
