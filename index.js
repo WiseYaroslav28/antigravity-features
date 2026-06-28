@@ -371,6 +371,9 @@ server.tool(
     }
     
     try {
+      const langFile = path.join(userProfileDir, ".gemini", "antigravity", "antigravity_lang.txt");
+      await fs.writeFile(langFile, lang);
+      
       const portFile = path.join(userProfileDir, "AppData", "Roaming", "Antigravity", "DevToolsActivePort");
       if (fsSync.existsSync(portFile)) {
         const content = await fs.readFile(portFile, "utf8");
@@ -558,6 +561,16 @@ async function triggerSelfUpdate() {
   }
 }
 
+async function getSavedLanguage() {
+  const langFile = path.join(userProfileDir, ".gemini", "antigravity", "antigravity_lang.txt");
+  try {
+    if (fsSync.existsSync(langFile)) {
+      return (await fs.readFile(langFile, "utf8")).trim();
+    }
+  } catch (_) {}
+  return "ru";
+}
+
 let isInjecting = false;
 
 async function runUIInjection() {
@@ -614,7 +627,8 @@ async function runUIInjection() {
     }
     const localizationCode = fsSync.readFileSync(locPath, 'utf8');
 
-    // Получаем карту проектов
+    // Получаем карту проектов и сохраненный язык
+    const savedLang = await getSavedLanguage();
     const projectsMap = await getProjectsMap();
     const projectsMapStr = JSON.stringify(projectsMap);
     
@@ -629,6 +643,7 @@ async function runUIInjection() {
     
     const injectionScript = `
       (() => {
+        window.__antigravity_saved_lang = "${savedLang}";
         window.__antigravity_projects_map = ${projectsMapStr};
         if (!window.__antigravity_translation_initialized) {
             window.__antigravity_translation_initialized = true;
@@ -996,14 +1011,25 @@ async function runUIInjection() {
               if (action) {
                 window.__antigravity_pending_action = null;
               }
-              return action;
+              const pendingLang = window.__antigravity_pending_lang_change || null;
+              if (pendingLang) {
+                window.__antigravity_pending_lang_change = null;
+              }
+              return { action, pendingLang };
             })()
           `;
           const evaluatePromise = pageRuntime.evaluate({ expression: queryScript, returnByValue: true });
           const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("evaluate timeout")), 2000));
           const evalRes = await Promise.race([evaluatePromise, timeoutPromise]);
           if (evalRes && evalRes.result && evalRes.result.value) {
-            actionTriggered = evalRes.result.value;
+            const resVal = evalRes.result.value;
+            actionTriggered = resVal.action;
+            const pendingLang = resVal.pendingLang;
+            if (pendingLang && (pendingLang === 'ru' || pendingLang === 'en')) {
+              const langFile = path.join(userProfileDir, ".gemini", "antigravity", "antigravity_lang.txt");
+              await fs.writeFile(langFile, pendingLang);
+              logDebug(`[Localization] Пользователь сменил язык в UI на: ${pendingLang}. Настройка сохранена на диск.`);
+            }
           }
         }
 

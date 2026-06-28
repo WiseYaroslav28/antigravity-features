@@ -1510,7 +1510,12 @@ function initLanguageSwitcher() {
     const btnEn = document.getElementById('lang-btn-en');
     const btnRu = document.getElementById('lang-btn-ru');
     
-    let currentLang = localStorage.getItem('antigravity_lang') || 'ru';
+    let currentLang = localStorage.getItem('antigravity_lang') || window.__antigravity_saved_lang || 'ru';
+    
+    // Принудительно сохраняем в localStorage, если взято из глобальной переменной
+    if (!localStorage.getItem('antigravity_lang')) {
+        localStorage.setItem('antigravity_lang', currentLang);
+    }
     
     function updateUI() {
         if (currentLang === 'ru') {
@@ -1529,12 +1534,14 @@ function initLanguageSwitcher() {
     btnEn.addEventListener('click', () => {
         currentLang = 'en';
         localStorage.setItem('antigravity_lang', 'en');
+        window.__antigravity_pending_lang_change = 'en';
         updateUI();
     });
     
     btnRu.addEventListener('click', () => {
         currentLang = 'ru';
         localStorage.setItem('antigravity_lang', 'ru');
+        window.__antigravity_pending_lang_change = 'ru';
         updateUI();
     });
     
