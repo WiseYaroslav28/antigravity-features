@@ -2,6 +2,41 @@
 // Language Translation System (RU / EN) for Injected Chromium Pages
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Global Crash / Exception Catchers for Injected Page
+// ---------------------------------------------------------------------------
+window.__antigravity_crash_logs = window.__antigravity_crash_logs || [];
+if (!window.__antigravity_crash_handlers_installed) {
+  window.__antigravity_crash_handlers_installed = true;
+  window.addEventListener('error', (event) => {
+    try {
+      window.__antigravity_crash_logs.push({
+        type: 'error',
+        message: event.message || String(event),
+        source: event.filename || '',
+        lineno: event.lineno || 0,
+        colno: event.colno || 0,
+        stack: event.error ? (event.error.stack || event.error.message || '') : null,
+        time: new Date().toISOString()
+      });
+    } catch (e) {
+      console.error('[Injected Crash Handler] Error catching error:', e);
+    }
+  });
+  window.addEventListener('unhandledrejection', (event) => {
+    try {
+      window.__antigravity_crash_logs.push({
+        type: 'unhandledrejection',
+        reason: event.reason ? (event.reason.message || String(event.reason)) : null,
+        stack: event.reason ? (event.reason.stack || '') : null,
+        time: new Date().toISOString()
+      });
+    } catch (e) {
+      console.error('[Injected Crash Handler] Error catching rejection:', e);
+    }
+  });
+}
+
 function normalizeText(str) {
     if (!str) return '';
     return str.replace(/[\s\u00a0\xa0\u2007\u202f\r\n\t]+/g, ' ').trim();

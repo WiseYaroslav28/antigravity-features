@@ -1059,6 +1059,63 @@ async function runUIInjection() {
           logDebug(`[Debug UI] Ошибка сбора отладки: ${deErr.message}`);
         }
 
+        // 2.7. Сбор краш-логов из Chromium-инжектора (window.__antigravity_crash_logs)
+        try {
+          const crashLogsEval = await pageRuntime.evaluate({
+            expression: `(() => {
+              const logs = window.__antigravity_crash_logs || [];
+              window.__antigravity_crash_logs = [];
+              return JSON.stringify(logs);
+            })()`,
+            returnByValue: true
+          }).catch(() => null);
+
+          if (crashLogsEval && crashLogsEval.result && crashLogsEval.result.value) {
+            const logs = JSON.parse(crashLogsEval.result.value);
+            if (logs.length > 0) {
+              const userProfileDir = process.env.USERPROFILE || 'C:\\Users\\wisey';
+              const logPath = path.join(userProfileDir, '.gemini', 'antigravity', 'global_health.log');
+              
+              // Локальный хелпер ротации (чтобы не тянуть зависимости)
+              const MAX_LOG_SIZE = 5 * 1024 * 1024;
+              const MAX_BACKUPS = 3;
+              const rotateLog = (file) => {
+                try {
+                  if (!fsSync.existsSync(file)) return;
+                  const stats = fsSync.statSync(file);
+                  if (stats.size < MAX_LOG_SIZE) return;
+                  for (let i = MAX_BACKUPS - 1; i >= 1; i--) {
+                    const src = `${file}.${i}`;
+                    const dest = `${file}.${i + 1}`;
+                    if (fsSync.existsSync(src)) fsSync.renameSync(src, dest);
+                  }
+                  fsSync.renameSync(file, `${file}.1`);
+                } catch (_) {}
+              };
+
+              rotateLog(logPath);
+
+              for (const log of logs) {
+                const logEntry = {
+                  timestamp: log.time || new Date().toISOString(),
+                  bridge: 'Chromium-Renderer',
+                  type: log.type || 'error',
+                  message: log.message || log.reason || 'Unknown renderer error',
+                  stack: log.stack || '',
+                  metadata: {
+                    pageTitle: page.title || '',
+                    pageUrl: page.url || ''
+                  }
+                };
+                fsSync.appendFileSync(logPath, JSON.stringify(logEntry) + '\n', 'utf8');
+                logDebug(`[Chromium-Renderer Error] Caught error: ${logEntry.message}`);
+              }
+            }
+          }
+        } catch (crashErr) {
+          logDebug(`[Crash Logger] Ошибка сбора логов Chromium: ${crashErr.message}`);
+        }
+
         // 3. Автоматический бэкап Local Storage со страницы
         const backupScript = `
           (() => {
