@@ -1153,11 +1153,7 @@ function translateTextNode(node) {
         }
         
         if (translated) {
-            console.log(`[Localization] Translating node text: "${text}" -> "${translated}"`);
-            if (shouldIgnore(node)) {
-                console.log(`[Localization] Ignored node text: "${text}" because shouldIgnore is true`);
-                return;
-            }
+            if (shouldIgnore(node)) return;
             
             const parent = node.parentElement;
             if (parent) {
@@ -1386,7 +1382,6 @@ function startObserving() {
     
     try {
         translationObserver = new MutationObserver((mutations) => {
-            console.log(`[Localization Observer] Mutations callback triggered: ${mutations.length} mutations. isTranslating = ${isTranslating}, currentLang = ${currentLang}`);
             if (isTranslating) return;
             
             // Временно отключаем наблюдение, чтобы избежать бесконечного цикла из собственных изменений
