@@ -1,3 +1,5 @@
+> 🚀 **Доступна новая версия v2 для Google AntiGravity 2.0:** [**WiseYaroslav28/antigravity-features-v2**](https://github.com/WiseYaroslav28/antigravity-features-v2)
+
 # AntiGravity Features Service
 
 Этот проект представляет собой **изолированный MCP-сервер**, разработанный для расширения возможностей, автоматизации и локализации интерфейса приложения AntiGravity v2.1.4 (и выше).
@@ -68,3 +70,21 @@
 ## Рекомендация по разработке
 
 Рекомендуется открыть эту папку (`C:\Antigravity projects\antigravity-features`) как **активную рабочую область (Active Workspace)** в настройках AntiGravity, чтобы вести дальнейшую разработку новых надстроек, управлять бэкапами и отслеживать историю изменений.
+
+---
+
+## 💖 Поддержать проект / Support & Donate
+
+Если проект оказался вам полезен, вы можете поддержать его развитие из любой точки мира (РФ, СНГ и любые зарубежные страны):  
+If you find this project helpful, you can support its continued development:
+
+[![Donate via Tribute Web](https://img.shields.io/badge/💳_Карты_РФ_и_Мира_/_Cards-Tribute_Web-ff4b4b?style=for-the-badge)](https://web.tribute.tg/d/SGR)
+[![Donate via Telegram](https://img.shields.io/badge/✈️_Telegram_Tribute-Mini_App-2CA5E0?style=for-the-badge)](https://t.me/tribute/app?startapp=dSGR)
+
+* **💳 Банковские карты (РФ, СНГ и весь мир) в браузере / Bank Cards (Web)**: [https://web.tribute.tg/d/SGR](https://web.tribute.tg/d/SGR)
+* **✈️ Донат через Telegram (Карты и Telegram Stars)**: [https://t.me/tribute/app?startapp=dSGR](https://t.me/tribute/app?startapp=dSGR)
+* **💎 Криптовалюта / Crypto (Ethereum `ETH` и любые токены `ERC-20`: `USDT`, `USDC` в сети Ethereum)**:
+  ```text
+  0x729D819802EF2B8Eaab8eE7F0431fE1d288E6688
+  ```
+
